@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abonnement au Gymnase Terminé</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: yellow;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            padding: 30px;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #e74c3c;
+        }
+
+        p {
+            font-size: 18px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .renew-button {
+            display: inline-block;
+            background-color: #e74c3c;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .renew-button:hover {
+            background-color: #c0392b;
+        }
+
+        .gym-logo {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+<!--        <img src="gym-logo.png" alt="Logo du Gymnase" class="gym-logo">-->
+<!--        <h1>Votre Abonnement au Gymnase a Expiré</h1>-->
+        <p>Cher(e) <span id="memberName">{{member_name}}</span>,</p>
+<!--        <p>Votre adhésion au gymnase a expiré. Nous serions ravis de vous accueillir à nouveau. Veuillez vous rendre à la réception pour effectuer le paiement et renouveler votre abonnement si vous souhaitez continuer à utiliser nos installations.</p>-->
+        <p>Nous espérons que vous êtes en pleine forme et que vous avez pu pleinement profiter de votre expérience au sein de notre salle de sport.<span> Nous tenons à vous informer que votre abonnement à l'activité
+            {{activity_name}} a expiré.</span></p>
+        <p>Le renouvellement de votre abonnement est simple. Vous pouvez le faire en personne à la réception de notre salle de sport.</p>
+        <p>Nous vous remercions pour votre confiance continue en notre salle de sport, et nous sommes là pour vous aider à chaque étape de votre parcours.</p>
+        <p>Sincères salutations sportives.</p>
+<!--        <a href="#" class="renew-button" id="renewButton">Visitez la Réception</a>-->
+    </div>
+    <script>
+        // JavaScript code to update member's name (You can replace [Nom du Membre] with the actual member's name)
+        document.getElementById('memberName').textContent = 'John Doe'; // Replace 'John Doe' with the member's name
+    </script>
+</body>
+</html>

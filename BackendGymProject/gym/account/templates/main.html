@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Email Title</title>
+    <style>
+        /* Reset some default styles */
+        body, p, h1, h2, h3, h4, h5, h6, td {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f7f7f7;
+        }
+
+        /* Main container */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* Background image */
+        .email-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Header styles */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #007bff;
+            font-size: 36px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Description styles */
+        .description {
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+            padding-left: 14px;
+        }
+
+        /* Name styles */
+        .name {
+            font-weight: bold;
+            color: #333333;
+        }
+
+        /* Code styles */
+        .code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f2f2f2;
+            padding: 14px;
+            border-radius: 5px;
+            overflow-wrap: break-word;
+            font-size: 22px;
+            text-align: center;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            color: #007bff;
+        }
+
+        /* Footer styles */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888888;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+<!--        <img class="email-background" src="https://example.com/path/to/background-image.jpg" alt="Background Image">-->
+
+        <div class="header">
+            <h1>
+                Verification Email
+            </h1>
+        </div>
+        <div class="description">
+            <p>Hello <span class="name">
+                {{name}}
+            </span>,</p>
+            <p style="margin-bottom: 10px;">
+                You are receiving this email to verify your account. Please use the following OTP to complete the verification process:
+            </p>
+            <p style="margin-bottom: 10px;">
+                Thank you for using our service!
+            </p>
+            <p style="margin-bottom: 10px;">
+                Best regards, <span class="name">MYGYM</span>
+            </p>
+            <p>Here is your unique code:</p>
+            <div class="code">
+                <!-- Insert your unique code here -->
+                {{code}}
+            </div>
+        </div>
+        <div class="footer">
+            <p>Thank you for using our service!</p>
+        </div>
+    </div>
+</body>
+</html>
