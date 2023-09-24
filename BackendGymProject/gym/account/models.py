@@ -5,8 +5,8 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator
 from dateutil.relativedelta import relativedelta
 
-class TimeSendEmail(models.Model):
-    timeEmail = models.DateField()
+# class TimeSendEmail(models.Model):
+#     timeEmail = models.DateField()
 
 class Person(models.Model):
     GENDER_CHOICES = [
@@ -23,7 +23,7 @@ class Person(models.Model):
     birthdate = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     picture = models.ImageField(upload_to='storeImg/%Y/%m/%d/', default='store.png', blank=True)
-    TimeEmail = models.OneToOneField(TimeSendEmail, on_delete=models.SET_NULL, related_name="TimeEmailPerson", null=True)
+    TimeEmail = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -73,6 +73,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
+    # TimeEmail = models.DateField(blank=True, null=True)
     # updated_at = models.DateField(auto_now=True)
 
     objects = UserManager()

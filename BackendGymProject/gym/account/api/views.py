@@ -445,8 +445,8 @@ class NotificationView(APIView):
 
         expired_subscriptions = []
         expired_subscriptions_id = []
-        list_member_mails = []
-        list_member_data = []
+        # list_member_mails = []
+        # list_member_data = []
         data = serializer.data
         for item in range(len(serializer.data)):
             person_id = data[item]['person']['id']
@@ -469,17 +469,21 @@ class NotificationView(APIView):
                     expired_subscriptions[len(expired_subscriptions) - 1]['member_sub'] = list_sub
                     # list_member_data.append(dicOfMember)
                     # list_member_mails.append(person_email)
-                    context = {
-                            'member_name': person_name,
-                            'activity_name': activity_name,
-                            # 'date_debut': date_debut,
-                            # 'date_fin': date_fin
-                            # 'profile_picture_url': person_picture.url
-                        }
-                    email_template = render(request, 'reminderMail.html', context)
-                    email_content = email_template.content.decode('utf-8')
-                    send_reminder_mail(person_email, email_content)
-        # asyncio.create_task(send_emails(list_member_data, list_member_mails))
+                    person = Person.objects.get(id=person_id)
+                    if(person.TimeEmail != timezone.now().date()):
+                        person.TimeEmail = timezone.now()
+                        person.save()
+                        context = {
+                                'member_name': person_name,
+                                'activity_name': activity_name,
+                                # 'date_debut': date_debut,
+                                # 'date_fin': date_fin
+                                # 'profile_picture_url': person_picture.url
+                            }
+                        email_template = render(request, 'reminderMail.html', context)
+                        email_content = email_template.content.decode('utf-8')
+                        send_reminder_mail(person_email, email_content)
+
         return Response({'message': 'notification send it', 'data': expired_subscriptions}, status=status.HTTP_200_OK)
 
 class DashboardView(APIView):
