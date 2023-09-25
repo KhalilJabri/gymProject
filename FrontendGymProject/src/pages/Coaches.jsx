@@ -10,7 +10,7 @@ const Coaches = () => {
 
     const rowStyle ='p-2 font-bold tracking-wide text-center border-2 text-sm';
     const style={backgroundColor:'light-gray'};
-    const {showCoachDetails, setShowCoachDetails, handleClickCoachDetails} = useStateContext();
+    const {showCoachDetails, setShowCoachDetails, handleClickCoachDetails,delCoach,setDelCoach,handeleClickDelCoach} = useStateContext();
     return (
     <div className='m-2 md:m-8 mt-20 p-3 md:p-12 bg-white rounded-3xl '>
         <Header category="Page" title="Coachs" />
@@ -45,9 +45,14 @@ const Coaches = () => {
             </table>
         </div>
 
-        <Modal style={style} open = {showCoachDetails!==0} onCancel={()=> setShowCoachDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-35% mt-7 mb-1 py-2 px-4 rounded-lg'>Delete Account</button>}>
+        <Modal style={style} open = {showCoachDetails!==0} onCancel={()=> setShowCoachDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-35% mt-7 mb-1 py-2 px-4 rounded-lg' onClick={() =>handeleClickDelCoach()}>Delete Account</button>}>
             <CoachDetails/>
         </Modal> 
+
+        <Modal open={delCoach===true} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} onCancel={() => handeleClickDelCoach()}>
+            <h3 className=' text-xl font-semibold mb-3'>Confirm Account Deletion</h3>
+            <p className='m-3'>Are you sure you want to delete your account?</p>
+        </Modal>
     </div>
   )
 }

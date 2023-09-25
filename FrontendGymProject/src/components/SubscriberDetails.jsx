@@ -98,8 +98,3 @@ const SubscriberDetails = () => {
 
 export default SubscriberDetails
 
-
-
-               {/* <button className='m-1 md:m-5 text-lg md:text-xl hover:text-xl' onClick={() => handleClickEditSub(item.id)} ><TbUserEdit/></button> 
-              <button className='m-1 md:m-5 text-lg md:text-xl  hover:text-xl'><MdDeleteOutline/></button> */}
-              {/* <button className='m-1 md:m-5 text-lg md:text-2xl hover:text-4xl' onClick={() => handleClickPayment(item.id)}><GiReceiveMoney/></button> */}

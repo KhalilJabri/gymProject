@@ -7,13 +7,14 @@ import {  Switch  } from 'antd';
 import {Modal} from 'antd'
 import {FaUserCog} from 'react-icons/fa'
 import {AiFillCloseCircle} from 'react-icons/ai'
+import { MdPadding } from 'react-icons/md'
 
 
 const Employees = () => {
     console.log(link)
     const style={backgroundColor:'light-gray'};
     const rowStyle ='p-2 font-bold tracking-wide text-center border-2 text-sm';
-    const {showEmployeeDetails, setShowEmployeeDetails, handleClickEmployeeDetails} = useStateContext();
+    const {showEmployeeDetails, setShowEmployeeDetails, handleClickEmployeeDetails, delEmp,setDelEmp,handeleClickDelEmp} = useStateContext();
 
     // const fetchData = async(value) =>{
     // const response = await fetch(`${link}/account/member/`,{
@@ -69,9 +70,15 @@ const Employees = () => {
             </table>
         </div> 
 
-        <Modal style={style} open = {showEmployeeDetails!==0} onCancel={()=> setShowEmployeeDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-35% mt-7 mb-1 py-2 px-4 rounded-lg'>Delete Account</button>}>
+        <Modal style={style} open = {showEmployeeDetails!==0} onCancel={()=> setShowEmployeeDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-35% mt-7 mb-1 py-2 px-4 rounded-lg' onClick={()=> handeleClickDelEmp()}>Delete Account</button>}>
             <EmployeeDetails/>
         </Modal>
+
+        <Modal open={delEmp===true} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} onCancel={()=> handeleClickDelEmp()}>
+            <h3 className=' text-xl font-semibold mb-3'>Confirm Account Deletion</h3>
+            <p className='m-3'>Are you sure you want to delete your account?</p>
+        </Modal>
+
     </div>
   )
 }

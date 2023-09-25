@@ -13,7 +13,7 @@ const Subscribers = () => {
   const rowStyle ='p-2 text-sm font-bold tracking-wide text-center border-2';
   const iconVerif = {color: 'green', fontSize: "1.5em", margin: "auto" };
   const iconClose = {color: 'red', fontSize: "1.5em", margin: "auto" };
-  const {showSubDetails, setShowSubDetails,handleClickSubDetails} = useStateContext();
+  const {showSubDetails, setShowSubDetails,handleClickSubDetails,delSub, setDelSub, handeleClickDelSub} = useStateContext();
 
 //   const [data, setData] = useState([])
 //   const fetchData = async(value) =>{
@@ -68,9 +68,14 @@ const Subscribers = () => {
             </tbody>
         </table>
     </div>  
-    <Modal style={style} width={800} open = {showSubDetails!==0} onCancel={()=> setShowSubDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-m mt-7 mb-1 py-2 px-4 rounded-lg'>Delete Account</button>}>
+    <Modal style={style} width={800} open = {showSubDetails!==0} onCancel={()=> setShowSubDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-m mt-7 mb-1 py-2 px-4 rounded-lg' onClick={()=> handeleClickDelSub()}>Delete Account</button>}>
         <SubscriberDetails/>
     </Modal> 
+
+    <Modal open={delSub===true} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} onCancel={() => handeleClickDelSub()}>
+        <h3 className=' text-xl font-semibold mb-3'>Confirm Account Deletion</h3>
+        <p className='m-3'>Are you sure you want to delete your account?</p>
+    </Modal>
 </div>
   )
 }
