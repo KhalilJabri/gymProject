@@ -7,19 +7,21 @@ from django.contrib.auth import authenticate
 from django.shortcuts import render
 import random
 import string
-import asyncio
-from dateutil.relativedelta import relativedelta
-# from django.db.models import OuterRef, Subquery
 from django.utils import timezone
-from django.db.models import F, ExpressionWrapper, Case, When, Value, DateField, Q, Count
+from django.db.models import Sum, Count
 
-from ..models import User, Member, Coach, Person, Activity, Subscription
-from ..email import send_otp_via_email, send_reminder_mail
+from ..models import User, Member, Coach, Person, Activity, Subscription, Gym
+from ..email import (send_otp_via_email, send_reminder_mail, send_greetings_mail_coach, send_greetings_mail_employee,
+                     send_greetings_mail_Member)
 from .serializers import (LoginSerializer, RegisterUserSerializer, UserResetChangePasswordSerializer, SendOtpSerializer,
-    VerifyOtpSerializer, ModifyUserSerializer, GetCoachSerializer, AddGetMemberSerializer, MngPersonMemberSerializer,
-    MngPersonCoachSerializer, CoachSerializer, ActivitySerializer, FirstSubscriptionSerializer, UpdateMemberSerializer,
-    GetSpecificMemberSerialiser, UsersSerializer, ActiveUserSerializer, SubscriptionSerializer, SpecificSubscriptionSerializer,
-    UpdateCoachSerializer, AddCoachSerializer, FirstSubscriptionSerializer, AddMemberSerializer, NotificationsSerializer )
+                          VerifyOtpSerializer, ModifyUserSerializer, GetCoachSerializer, AddGetMemberSerializer,
+                          MngPersonMemberSerializer, MngPersonCoachSerializer, CoachSerializer, ActivitySerializer,
+                          FirstSubscriptionSerializer,UpdateMemberSerializer,GetSpecificMemberSerialiser, UsersSerializer,
+                          ChangePermissionUserSerializer,SubscriptionSerializer, SpecificSubscriptionSerializer,
+                          UpdateCoachSerializer, AddCoachSerializer, FirstSubscriptionSerializer, AddMemberSerializer,
+                          NotificationsSerializer, GymSerializer, SpecificUserSerializer, ActiveMemberSerializer,
+                          DashboardMoneySerializer, DashboardNumberPeopleActivitySerializer, DashboardNumberOfGenderSerializer,
+                          )
 
 
 def get_tokens_for_user(user):
@@ -53,19 +55,16 @@ class UserLoginView(APIView):
         return Response({'message': 'something went wrong!', 'error': serializer.errors},
                         status=status.HTTP_400_BAD_REQUEST)
 
-class ActiveUserView(APIView):
+class ChangePermissionUserView(APIView):
     def put(self, request, pk):
         try:
             user_active = User.objects.get(id=pk)
         except User.DoesNotExist:
             return Response({'message': 'user not found'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = ActiveUserSerializer(user_active, data=request.data)
+        serializer = ChangePermissionUserSerializer(user_active, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            if request.data.get('is_active'):
-                return Response({'message': 'user activated'}, status=status.HTTP_200_OK)
-            else:
-                return Response({'message': 'user disabled'}, status=status.HTTP_200_OK)
+            return Response({'message': 'permission changed successfully', 'data': serializer.data}, status=status.HTTP_200_OK)
         else:
             return Response({'message': 'something went wrong!', 'error': serializer.errors},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -74,7 +73,24 @@ class UserRegisterView(APIView):
     def post(self, request):
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+
+            try:
+                gym = Gym.objects.all().first()
+                if gym is None:
+                    return Response({'message': 'you should set data for your gym to can send mail to users'}, status=status.HTTP_404_NOT_FOUND)
+            except Gym.DoesNotExist:
+                return Response({'message': 'Gym model does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            instance_user = serializer.save()
+            instance_user.created_at = timezone.now().date()
+            instance_user.save()
+            context = {
+                'employee_name': serializer.data['name'],
+                'gym_name': gym.name,
+                # 'gym_picture': gym.pictureGym.url
+            }
+            email_template = render(request, 'email_emplyee.html', context)
+            email_content = email_template.content.decode('utf-8')
+            send_greetings_mail_employee(serializer.data['email'], email_content)
             return Response({'message': 'registration successfully'}, status=status.HTTP_201_CREATED)
         return Response({'message': 'something went wrong!', 'error': serializer.errors}, status=status.HTTP_404_NOT_FOUND)
 
@@ -97,7 +113,7 @@ class SendOtpView(APIView):
                 'message': 'i guess you get mail verification well',
                 'code': generated_code
             }
-            email_template = render(request, 'main.html', context)
+            email_template = render(request, 'sendOtp.html', context)
             email_content = email_template.content.decode('utf-8')
             send_otp_via_email(serializer.data['email'], email_content)
             return Response({'message': 'code sended!', 'code': generated_code}, status=status.HTTP_200_OK)
@@ -176,31 +192,27 @@ class ModifyUserProfileView(APIView):
 class GetUsersView(APIView):
     def get(self, request):
         users = User.objects.all()
-        serializer = UsersSerializer(users, many=True)
+        serializer = UsersSerializer(users, many=True, context={"request": request})
         return Response({'message': 'all users', 'data': serializer.data}, status=status.HTTP_200_OK)
+
+class GetSpecificUserView(APIView):
+    def get(self, request, pk):
+        try:
+            user = User.objects.get(id=pk)
+        except User.DoesNotExist:
+            return Response({'message': 'user not found!'}, status=status.HTTP_404_NOT_FOUND)
+        # users = User.objects.all()
+        serializer = SpecificUserSerializer(user, context={"request": request})
+        return Response({'message': 'user exist', 'data': serializer.data}, status=status.HTTP_200_OK)
 
 class AddGetMemberView(APIView):
     def get(self, request, format=None):
         activity_name = request.GET.get('activity_name', '')
-        # member = Member.objects.filter(member_sub__activity__name=activity_name)
-        # serializer = AddGetMemberSerializer(member, many=True)
-        # members_with_max_rest_days = []
-        # members_id_with_max_rest_days = []
-        # # Iterate through the serialized data and find the maximum restDays for each member
-        # for member_data in serializer.data:
-        #     max_rest_days = 0  # Initialize max_rest_days to 0 for the current member
-        #
-        #     for subscription in member_data['member_sub']:
-        #         rest_days = subscription['restDays']
-        #         max_rest_days = max(max_rest_days, rest_days)
-        #
-        #     # Include the maximum restDays in the member's data
-        #     member_data['restDays'] = max_rest_days
-        #     if not member_data['id'] in members_id_with_max_rest_days:
-        #         members_with_max_rest_days.append(member_data)
-        #         members_id_with_max_rest_days.append(member_data['id'])
-        sub = Subscription.objects.filter(activity__name=activity_name)
-        serializer = FirstSubscriptionSerializer(sub, many=True)
+        if len(activity_name)!=0:
+            sub = Subscription.objects.filter(activity__name=activity_name)
+        else:
+            sub = Subscription.objects.all()
+        serializer = FirstSubscriptionSerializer(sub, many=True, context={"request": request})
         members_with_max_rest_days = []
         members_id_with_max_rest_days = []
 
@@ -213,7 +225,7 @@ class AddGetMemberView(APIView):
                 if(sub_data['restDays'] > members_with_max_rest_days[index]['restDays']):
                     members_with_max_rest_days[index] = sub_data
 
-        return Response(members_with_max_rest_days, status=status.HTTP_200_OK)
+        return Response({'message': 'data of mebers', 'data': members_with_max_rest_days}, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
         serializer = AddMemberSerializer(data=request.data)
@@ -231,10 +243,19 @@ class AddGetMemberView(APIView):
                     member_instance = member_serializer.save()
                     subscription_instance = serializer.data['subscription']
                     subscription_instance['member'] = member_instance.id
-                    print(subscription_instance['member'])
+                    # print(subscription_instance['member'])
                     serializer_subscription = SubscriptionSerializer(data=subscription_instance)
                     if serializer_subscription.is_valid():
                         serializer_subscription.save()
+                        gym = Gym.objects.all().first()
+                        context = {
+                            'member_name': serializer.data['person']['name'],
+                            'gym_name': gym.name,
+                            # 'gym_picture': gym.pictureGym.url
+                        }
+                        email_template = render(request, 'email_member.html', context)
+                        email_content = email_template.content.decode('utf-8')
+                        send_greetings_mail_Member(serializer.data['person']['email'], email_content)
                         return Response({'message': 'member and his subscription saved successfully', 'data': serializer_subscription.data},
                                     status=status.HTTP_201_CREATED)
                     else:
@@ -253,6 +274,19 @@ class AddGetMemberView(APIView):
         return Response({'message': 'something wrong with Person or subscription model', 'error': serializer.errors},
                         status=status.HTTP_400_BAD_REQUEST)
 
+class ActiveMemberView(APIView):
+    def put(self, request, pk):
+        try:
+            activeMember = Member.objects.get(id=pk)
+        except Member.DoesNotExist:
+            return Response({'messsage': 'member not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ActiveMemberSerializer(activeMember.person, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'status of member changed successfully', 'data': serializer.data}, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response({'message': 'something wrong!!'}, status=status.HTTP_400_BAD_REQUEST)
+
 class SpecificMemberView(APIView):
     def get(self, request, pk):
         try:
@@ -261,7 +295,7 @@ class SpecificMemberView(APIView):
             except Member.DoesNotExist:
                 return Response({'messsage': 'member not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            serializer_member = GetSpecificMemberSerialiser(member)
+            serializer_member = GetSpecificMemberSerialiser(member, context={"request": request})
             return Response({'message': 'member exist', 'data': serializer_member.data}, status=status.HTTP_200_OK)
         except:
             return Response({'message': 'something wrong'}, status=status.HTTP_400_BAD_REQUEST)
@@ -298,7 +332,7 @@ class SpecificMemberView(APIView):
 class AddGetCoachView(APIView):
     def get(self, request):
         coach = Coach.objects.all()
-        serializer = GetCoachSerializer(coach, many=True)
+        serializer = GetCoachSerializer(coach, many=True, context={"request": request})
         return Response({'message': 'data of coachs', 'data': serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
@@ -306,6 +340,11 @@ class AddGetCoachView(APIView):
         if serializer.is_valid():
             serializer_person = MngPersonCoachSerializer(data=serializer.validated_data['person'])
             if serializer_person.is_valid():
+                try:
+                    activity_name = Activity.objects.get(id=serializer.validated_data['activity'])
+                except Activity.DoesNotExist:
+                    return Response({'message': "activity does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
                 instance_person = serializer_person.save()
                 coach_data = {
                     'hireDate': serializer.validated_data['hireDate'],
@@ -315,6 +354,18 @@ class AddGetCoachView(APIView):
                 serializer_coach = CoachSerializer(data=coach_data)
                 if serializer_coach.is_valid():
                     serializer_coach.save()
+                    gym = Gym.objects.all().first()
+                    gym_serializer = GymSerializer(gym)
+                    # print(gym_serializer.data['pictureGym'])
+                    context = {
+                        'coach_name': instance_person.name,
+                        'gym_name': gym.name,
+                        'activity_name': activity_name.name,
+                        'gym_picture': gym.pictureGym.url
+                    }
+                    email_template = render(request, 'email_coach.html', context)
+                    email_content = email_template.content.decode('utf-8')
+                    send_greetings_mail_coach(serializer.data['person']['email'], email_content)
                     return Response({'message': 'coach saved successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
                 else:
                     instance_person.delete()
@@ -326,11 +377,14 @@ class AddGetCoachView(APIView):
 class SpecificCoachView(APIView):
     def get(self, request, pk):
         try:
-            coach = Coach.objects.get(id=pk)
-        except Coach.DoesNotExist:
-            return Response({'message': 'user not found'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = GetCoachSerializer(coach)
-        return Response({'message': 'data of coach', 'data': serializer.data}, status=status.HTTP_200_OK)
+            try:
+                coach = Coach.objects.get(id=pk)
+            except Coach.DoesNotExist:
+                return Response({'message': 'coach not found'}, status=status.HTTP_404_NOT_FOUND)
+            serializer = GetCoachSerializer(coach, context={"request": request})
+            return Response({'message': 'data of coach', 'data': serializer.data}, status=status.HTTP_200_OK)
+        except:
+            return Response({'message': 'error'}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
         try:
@@ -441,12 +495,10 @@ class SpecificActivityView(APIView):
 class NotificationView(APIView):
     def get(self, request):
         notificationMember = Member.objects.all()
-        serializer = NotificationsSerializer(notificationMember, many=True)
+        serializer = NotificationsSerializer(notificationMember, many=True, context={"request": request})
 
         expired_subscriptions = []
         expired_subscriptions_id = []
-        # list_member_mails = []
-        # list_member_data = []
         data = serializer.data
         for item in range(len(serializer.data)):
             person_id = data[item]['person']['id']
@@ -467,8 +519,6 @@ class NotificationView(APIView):
                         expired_subscriptions_id.append(person_id)
                     list_sub.append(sub)
                     expired_subscriptions[len(expired_subscriptions) - 1]['member_sub'] = list_sub
-                    # list_member_data.append(dicOfMember)
-                    # list_member_mails.append(person_email)
                     person = Person.objects.get(id=person_id)
                     if(person.TimeEmail != timezone.now().date()):
                         person.TimeEmail = timezone.now()
@@ -476,8 +526,6 @@ class NotificationView(APIView):
                         context = {
                                 'member_name': person_name,
                                 'activity_name': activity_name,
-                                # 'date_debut': date_debut,
-                                # 'date_fin': date_fin
                                 # 'profile_picture_url': person_picture.url
                             }
                         email_template = render(request, 'reminderMail.html', context)
@@ -488,4 +536,21 @@ class NotificationView(APIView):
 
 class DashboardView(APIView):
     def get(self, request, format=None):
-        pass
+        priceQueryset = Subscription.objects.values('startDate__year').annotate(total_price=Sum('price')).order_by('startDate__year')
+        priceSerializer = DashboardMoneySerializer(priceQueryset, many=True)
+
+        totalNumberQueryset = Member.objects.all().count()
+
+        activityNumberQueryset = Subscription.objects.values('activity__name').annotate(number_of_people=Count('activity'))
+        totalNumberSerializer = DashboardNumberPeopleActivitySerializer(activityNumberQueryset, many=True)
+
+        genderNumberQueryset = Member.objects.values('person__gender').annotate(number_of_gender=Count('person'))
+        genderNumberSerializer = DashboardNumberOfGenderSerializer(genderNumberQueryset, many=True)
+
+        data = {
+            'money': priceSerializer.data,
+            'totalNumber': totalNumberQueryset,
+            'numberActivity': totalNumberSerializer.data,
+            'number': genderNumberSerializer.data
+            }
+        return Response({'message': 'dashboard data', 'data': data}, status=status.HTTP_200_OK)

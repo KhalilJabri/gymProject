@@ -1,9 +1,11 @@
 from django.urls import path
 
 from .views import (UserLoginView, UserRegisterView, UserResetPasswordView, SendOtpView,
-    VerifyOtpView, ModifyUserProfileView, UserChangePasswordView, AddGetMemberView, SpecificMemberView,
-    AddGetCoachView, SpecificCoachView, ActivityView, SpecificActivityView, GetUsersView, ActiveUserView,
-    SubscriptionView, SpecificSubscriptionView, NotificationView)
+                    VerifyOtpView, ModifyUserProfileView, UserChangePasswordView, AddGetMemberView, SpecificMemberView,
+                    AddGetCoachView, SpecificCoachView, ActivityView, SpecificActivityView, GetUsersView,
+                    ChangePermissionUserView,
+                    SubscriptionView, SpecificSubscriptionView, NotificationView, GetSpecificUserView, ActiveMemberView,
+                    DashboardView, )
 
 urlpatterns = [
     path('login/', UserLoginView.as_view(), name='user_login'),
@@ -15,10 +17,13 @@ urlpatterns = [
     path('modifyOrDeleteUser/<int:pk>/', ModifyUserProfileView.as_view(), name='modify_user_profile'),
 
     path('users/', GetUsersView.as_view(), name='all_users'),
-    path('activeUser/<int:pk>/', ActiveUserView.as_view(), name='active_user'),
+    path('users/<int:pk>/', GetSpecificUserView.as_view(), name='get_specific_user'),
+    path('changePermissionUser/<int:pk>/', ChangePermissionUserView.as_view(), name='change_active_user'),
+    # path('adminUser/<int:pk>/', AdminUserView.as_view(), name='change_active_user'),
 
     path('member/', AddGetMemberView.as_view(), name='add_get_member'),
     path('member/<int:pk>/', SpecificMemberView.as_view(), name='get_update_delete_specific_member'),
+    path('activeMember/<int:pk>/', ActiveMemberView.as_view(), name="change_member_status"),
 
     path('coach/', AddGetCoachView.as_view(), name='add_get_coach'),
     path('coach/<int:pk>/', SpecificCoachView.as_view(), name='get_update_dalete_specific_coach'),
@@ -31,5 +36,6 @@ urlpatterns = [
 
     path('notification/', NotificationView.as_view(), name='notification'),
     # path('dashboard/'),
+    path('subscriptions/sum-by-year/', DashboardView.as_view(), name='subscription-sum-by-year'),
 
 ]

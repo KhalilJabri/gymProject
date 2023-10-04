@@ -4,7 +4,13 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from django.utils import timezone
 
-from ..models import User, Member, Coach, Person, Activity, Subscription
+from ..models import User, Member, Coach, Person, Activity, Subscription, Gym
+
+class GymSerializer(serializers.ModelSerializer):
+    pictureGym = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
+    class Meta:
+        model = Gym
+        fields = '__all__'
 
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
@@ -12,24 +18,16 @@ class LoginSerializer(serializers.ModelSerializer):
         model = User
         fields = ['email', 'password']
 
-    # def validate_email(self, value):
-    #     if User.objects.filter(email=value).exists():
-    #         raise serializers.ValidationError("A user with this email already existssssssss.")
-    #     return value
-
-class ActiveUserSerializer(serializers.ModelSerializer):
+class ChangePermissionUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'is_active']
-        extra_kwargs = {
-            'id': {'read_only': True}
-        }
+        fields = ['is_active', 'is_admin']
 
 class RegisterUserSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
     class Meta:
         model = User
-        fields = ['email', 'name', 'password', 'password2', 'cin', 'number', 'address', 'birthdate', 'picture']
+        fields = ['email', 'name', 'password', 'password2', 'cin', 'number', 'address', 'birthdate', 'picture', 'gender']
         # exclude = ['created_at', 'otp', 'is_active', 'is_admin']
         extra_kwargs = {
             'picture': {'read_only': True}
@@ -55,7 +53,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
                                                           'at least one lowercase letter, at least one special character'})
         if len(name) == 0:
             raise serializers.ValidationError({'message': 'name should not be empty!'})
-        print(bool(re.match(r'^(?:\d{8}|\d{12})$', cin)))
+        # print(bool(re.match(r'^(?:\d{8}|\d{12})$', cin)))
         if not bool(re.match(r'^(?:\d{8}|\d{12})$', cin)):
             raise serializers.ValidationError({'message': 'cin is not correct!'})
 
@@ -110,15 +108,26 @@ class ModifyUserSerializer(serializers.ModelSerializer):
         return instance
 
 class UsersSerializer(serializers.ModelSerializer):
+    picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
     class Meta:
         model = User
         # fields = '__all__'
-        exclude = ['password', 'otp']
+        fields = ['id', 'name', 'picture', 'number', 'is_active', 'is_admin']
+        # exclude = ['password', 'otp']
+
+class SpecificUserSerializer(serializers.ModelSerializer):
+    picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
+    class Meta:
+        model = User
+        # fields = '__all__'
+        fields = ['id', 'email', 'name', 'gender', 'address', 'picture', 'number', 'cin', 'birthdate', 'is_active', 'is_admin', 'created_at']
+        # exclude = ['password', 'otp']
 
 class FirstPersonMemberDetailsSerializer(serializers.ModelSerializer):
+    picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
     class Meta:
         model = Person
-        fields = ['name', 'gender']
+        fields = ['name', 'gender', 'is_active', 'picture']
 
 class FirstActivitySerializer(serializers.ModelSerializer):
     class Meta:
@@ -130,6 +139,11 @@ class MemberTableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
         fields = '__all__'
+
+class ActiveMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Person
+        fields = ['is_active']
 
 class FirstSubscriptionSerializer(serializers.ModelSerializer):
     restDays = serializers.SerializerMethodField()
@@ -243,6 +257,7 @@ class CoachSerializer(serializers.ModelSerializer):
 
 class MngPersonCoachSerializer(serializers.ModelSerializer):
     # coach_profile = AddGetMemberSerializer()
+    picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
     class Meta:
         model = Person
         fields = ['id', 'email', 'name', 'gender', 'address', 'number', 'cin', 'birthdate', 'picture', 'created_at']
@@ -295,6 +310,7 @@ class SpecificSubscriptionSerializer(serializers.ModelSerializer):
         fields = ['price', 'startDate', 'numberOfSub', 'typeOfNumberSub', 'activity']
 
 class NotificationPersonSerializer(serializers.ModelSerializer):
+    picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
     class Meta:
         model = Person
         fields = ['id', 'name', 'picture', 'email']
@@ -318,5 +334,14 @@ class NotificationsSerializer(serializers.ModelSerializer):
         model = Member
         fields = ['person', 'member_sub']
 
-class DashboardSerializer(serializers.Serializer):
-    pass
+class DashboardMoneySerializer(serializers.Serializer):
+    total_price = serializers.IntegerField()
+    year = serializers.IntegerField(source='startDate__year')
+
+class DashboardNumberPeopleActivitySerializer(serializers.Serializer):
+    totalNumber = serializers.IntegerField(source='number_of_people')
+    activityName = serializers.CharField(source='activity__name')
+
+class DashboardNumberOfGenderSerializer(serializers.Serializer):
+    genderNumber = serializers.IntegerField(source='number_of_gender')
+    genderType = serializers.CharField(source='person__gender')

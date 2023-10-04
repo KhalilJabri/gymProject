@@ -8,6 +8,13 @@ from dateutil.relativedelta import relativedelta
 # class TimeSendEmail(models.Model):
 #     timeEmail = models.DateField()
 
+class Gym(models.Model):
+    name = models.CharField(max_length=255)
+    pictureGym = models.ImageField(upload_to='GymImg/%Y/%m/%d/', blank=True)
+
+    def __str__(self):
+        return self.name
+
 class Person(models.Model):
     GENDER_CHOICES = [
         ('other', 'Other'),
@@ -22,8 +29,10 @@ class Person(models.Model):
     cin = models.CharField(max_length=8, blank=True)
     birthdate = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
-    picture = models.ImageField(upload_to='storeImg/%Y/%m/%d/', default='store.png', blank=True)
+    picture = models.ImageField(upload_to='storeImg/%Y/%m/%d/', default='user.png', blank=True)
     TimeEmail = models.DateField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -72,7 +81,7 @@ class User(AbstractBaseUser):
     picture = models.ImageField(upload_to='profileImage/%Y/%m/%d/', default='user.png', blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateField(null=True)
     # TimeEmail = models.DateField(blank=True, null=True)
     # updated_at = models.DateField(auto_now=True)
 
