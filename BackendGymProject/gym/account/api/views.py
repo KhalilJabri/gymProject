@@ -9,6 +9,8 @@ import random
 import string
 from django.utils import timezone
 from django.db.models import Sum, Count
+from django.db.models.functions import Cast
+from django.db.models import IntegerField
 
 from ..models import User, Member, Coach, Person, Activity, Subscription, Gym
 from ..email import (send_otp_via_email, send_reminder_mail, send_greetings_mail_coach, send_greetings_mail_employee,
@@ -21,7 +23,7 @@ from .serializers import (LoginSerializer, RegisterUserSerializer, UserResetChan
                           UpdateCoachSerializer, AddCoachSerializer, FirstSubscriptionSerializer, AddMemberSerializer,
                           NotificationsSerializer, GymSerializer, SpecificUserSerializer, ActiveMemberSerializer,
                           DashboardMoneySerializer, DashboardNumberPeopleActivitySerializer, DashboardNumberOfGenderSerializer,
-                          )
+                          DashboardNumberOfPeopleByActivitySerializer, )
 
 
 def get_tokens_for_user(user):
@@ -536,6 +538,11 @@ class NotificationView(APIView):
 
 class DashboardView(APIView):
     def get(self, request, format=None):
+        # x = Subscription.objects.values('startDate__year').annotate(total_price=Sum('price')).filter(total_price__gt=90)
+
+        total_price_queryset = Subscription.objects.aggregate(total_price=Sum('price'))
+        totalPrice = total_price_queryset['total_price']
+
         priceQueryset = Subscription.objects.values('startDate__year').annotate(total_price=Sum('price')).order_by('startDate__year')
         priceSerializer = DashboardMoneySerializer(priceQueryset, many=True)
 
@@ -547,10 +554,16 @@ class DashboardView(APIView):
         genderNumberQueryset = Member.objects.values('person__gender').annotate(number_of_gender=Count('person'))
         genderNumberSerializer = DashboardNumberOfGenderSerializer(genderNumberQueryset, many=True)
 
+        numberPeopleByActivityQueryset = Subscription.objects.values('activity__name').annotate(number=Count(Cast('member', IntegerField()), distinct=True))
+        numberPeopleByActivitySerializer = DashboardNumberOfPeopleByActivitySerializer(numberPeopleByActivityQueryset, many=True)
+
         data = {
-            'money': priceSerializer.data,
+            # 'x': x,
+            'totalMoney': totalPrice,
+            'moneyByYear': priceSerializer.data,
             'totalNumber': totalNumberQueryset,
-            'numberActivity': totalNumberSerializer.data,
-            'number': genderNumberSerializer.data
+            'numberOfActivity': totalNumberSerializer.data,
+            'numberOfGender': genderNumberSerializer.data,
+            'numberPeopleByActivity': numberPeopleByActivitySerializer.data
             }
         return Response({'message': 'dashboard data', 'data': data}, status=status.HTTP_200_OK)
