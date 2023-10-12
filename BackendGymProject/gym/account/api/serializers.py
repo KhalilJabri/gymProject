@@ -140,21 +140,22 @@ class MemberTableSerializer(serializers.ModelSerializer):
         model = Member
         fields = '__all__'
 
-class ActiveMemberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Person
-        fields = ['is_active']
+# class ActiveMemberSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Person
+#         fields = ['is_active']
 
 class FirstSubscriptionSerializer(serializers.ModelSerializer):
-    restDays = serializers.SerializerMethodField()
+    endDate = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
     member = MemberTableSerializer()
     activity = FirstActivitySerializer()
 
     class Meta:
         model = Subscription
-        fields = ['id', 'restDays', 'activity', 'member']
+        fields = ['id', 'endDate', 'status', 'activity', 'member']
 
-    def get_restDays(self, data):
+    def get_endDate(self, data):
         global endDate
         if(data.typeOfNumberSub == 'year'):
             endDate = data.startDate + relativedelta(years=data.numberOfSub)
@@ -162,8 +163,21 @@ class FirstSubscriptionSerializer(serializers.ModelSerializer):
             endDate = data.startDate + relativedelta(months=data.numberOfSub)
         elif (data.typeOfNumberSub == 'day'):
             endDate = data.startDate + relativedelta(days=data.numberOfSub)
-        rest_days = (endDate - datetime.now().date()).days
-        return rest_days
+        # rest_days = (endDate - datetime.now().date()).days
+        return endDate
+
+    def get_status(self, data):
+        global endDate
+        if(data.typeOfNumberSub == 'year'):
+            endDate = data.startDate + relativedelta(years=data.numberOfSub)
+        elif(data.typeOfNumberSub == 'month'):
+            endDate = data.startDate + relativedelta(months=data.numberOfSub)
+        elif (data.typeOfNumberSub == 'day'):
+            endDate = data.startDate + relativedelta(days=data.numberOfSub)
+        if endDate > timezone.now().date():
+            return True
+        else:
+            return False
 
 class AddGetMemberSerializer(serializers.ModelSerializer):
     # person = FirstPersonMemberDetailsSerializer()
@@ -337,10 +351,6 @@ class NotificationsSerializer(serializers.ModelSerializer):
 class DashboardMoneySerializer(serializers.Serializer):
     total_price = serializers.IntegerField()
     year = serializers.IntegerField(source='startDate__year')
-
-class DashboardNumberPeopleActivitySerializer(serializers.Serializer):
-    totalNumber = serializers.IntegerField(source='number_of_people')
-    activityName = serializers.CharField(source='activity__name')
 
 class DashboardNumberOfGenderSerializer(serializers.Serializer):
     genderNumber = serializers.IntegerField(source='number_of_gender')

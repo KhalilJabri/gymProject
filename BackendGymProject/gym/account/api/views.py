@@ -1,3 +1,4 @@
+from dateutil.relativedelta import relativedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -21,10 +22,9 @@ from .serializers import (LoginSerializer, RegisterUserSerializer, UserResetChan
                           FirstSubscriptionSerializer,UpdateMemberSerializer,GetSpecificMemberSerialiser, UsersSerializer,
                           ChangePermissionUserSerializer,SubscriptionSerializer, SpecificSubscriptionSerializer,
                           UpdateCoachSerializer, AddCoachSerializer, FirstSubscriptionSerializer, AddMemberSerializer,
-                          NotificationsSerializer, GymSerializer, SpecificUserSerializer, ActiveMemberSerializer,
-                          DashboardMoneySerializer, DashboardNumberPeopleActivitySerializer, DashboardNumberOfGenderSerializer,
-                          DashboardNumberOfPeopleByActivitySerializer, )
-
+                          NotificationsSerializer, GymSerializer, SpecificUserSerializer, DashboardNumberOfPeopleByActivitySerializer,
+                          DashboardMoneySerializer, DashboardNumberOfGenderSerializer,
+                          )
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -45,15 +45,15 @@ class UserLoginView(APIView):
                 token = get_tokens_for_user(user)
                 return Response({'message': 'login success', 'token': token}, status=status.HTTP_200_OK)
             else:
-                try:
-                    user_active = User.objects.get(email=email)
-                except User.DoesNotExist:
-                    return Response({'message': 'user not found mail'}, status=status.HTTP_404_NOT_FOUND)
-
-                if not user_active.is_active:
-                    return Response({'message': 'user account not active'}, status=status.HTTP_400_BAD_REQUEST)
-                else:
-                    return Response({'message': 'user not found! password'}, status=status.HTTP_404_NOT_FOUND)
+                # try:
+                #     user_active = User.objects.get(email=email)
+                # except User.DoesNotExist:
+                #     return Response({'message': 'user not found mail'}, status=status.HTTP_404_NOT_FOUND)
+                #
+                # if not user_active.is_active:
+                #     return Response({'message': 'user account not active'}, status=status.HTTP_400_BAD_REQUEST)
+                # else:
+                return Response({'message': 'user not found! password'}, status=status.HTTP_404_NOT_FOUND)
         return Response({'message': 'something went wrong!', 'error': serializer.errors},
                         status=status.HTTP_400_BAD_REQUEST)
 
@@ -193,7 +193,12 @@ class ModifyUserProfileView(APIView):
 
 class GetUsersView(APIView):
     def get(self, request):
-        users = User.objects.all()
+        search = request.GET.get('search', '')
+        if len(search) != 0:
+            users = User.objects.filter(name__icontains=search)
+        else:
+            users = User.objects.all()
+
         serializer = UsersSerializer(users, many=True, context={"request": request})
         return Response({'message': 'all users', 'data': serializer.data}, status=status.HTTP_200_OK)
 
@@ -210,10 +215,18 @@ class GetSpecificUserView(APIView):
 class AddGetMemberView(APIView):
     def get(self, request, format=None):
         activity_name = request.GET.get('activity_name', '')
-        if len(activity_name)!=0:
-            sub = Subscription.objects.filter(activity__name=activity_name)
+        search = request.GET.get('search', '')
+        if len(search)!=0:
+            if len(activity_name)!=0:
+                sub = Subscription.objects.filter(activity__name=activity_name, member__person__name__icontains=search)
+            else:
+                sub = Subscription.objects.filter(member__person__name__icontains=search)
         else:
-            sub = Subscription.objects.all()
+            if len(activity_name)!=0:
+                sub = Subscription.objects.filter(activity__name=activity_name)
+            else:
+                sub = Subscription.objects.all()
+
         serializer = FirstSubscriptionSerializer(sub, many=True, context={"request": request})
         members_with_max_rest_days = []
         members_id_with_max_rest_days = []
@@ -224,7 +237,7 @@ class AddGetMemberView(APIView):
                 members_with_max_rest_days.append(sub_data)
             else:
                 index = members_id_with_max_rest_days.index(sub_data['member']['id'])
-                if(sub_data['restDays'] > members_with_max_rest_days[index]['restDays']):
+                if(sub_data['endDate'] > members_with_max_rest_days[index]['endDate']):
                     members_with_max_rest_days[index] = sub_data
 
         return Response({'message': 'data of mebers', 'data': members_with_max_rest_days}, status=status.HTTP_200_OK)
@@ -276,18 +289,18 @@ class AddGetMemberView(APIView):
         return Response({'message': 'something wrong with Person or subscription model', 'error': serializer.errors},
                         status=status.HTTP_400_BAD_REQUEST)
 
-class ActiveMemberView(APIView):
-    def put(self, request, pk):
-        try:
-            activeMember = Member.objects.get(id=pk)
-        except Member.DoesNotExist:
-            return Response({'messsage': 'member not found'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = ActiveMemberSerializer(activeMember.person, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'status of member changed successfully', 'data': serializer.data}, status=status.HTTP_202_ACCEPTED)
-        else:
-            return Response({'message': 'something wrong!!'}, status=status.HTTP_400_BAD_REQUEST)
+# class ActiveMemberView(APIView):
+#     def put(self, request, pk):
+#         try:
+#             activeMember = Member.objects.get(id=pk)
+#         except Member.DoesNotExist:
+#             return Response({'messsage': 'member not found'}, status=status.HTTP_404_NOT_FOUND)
+#         serializer = ActiveMemberSerializer(activeMember.person, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({'message': 'status of member changed successfully', 'data': serializer.data}, status=status.HTTP_202_ACCEPTED)
+#         else:
+#             return Response({'message': 'something wrong!!'}, status=status.HTTP_400_BAD_REQUEST)
 
 class SpecificMemberView(APIView):
     def get(self, request, pk):
@@ -333,7 +346,12 @@ class SpecificMemberView(APIView):
 
 class AddGetCoachView(APIView):
     def get(self, request):
-        coach = Coach.objects.all()
+        search = request.GET.get('search', '')
+        if len(search) != 0:
+            coach = Coach.objects.filter(person__name__icontains=search)
+        else:
+            coach = Coach.objects.all()
+
         serializer = GetCoachSerializer(coach, many=True, context={"request": request})
         return Response({'message': 'data of coachs', 'data': serializer.data}, status=status.HTTP_200_OK)
 
@@ -507,10 +525,12 @@ class NotificationView(APIView):
             person_name = data[item]['person']['name']
             person_picture = data[item]['person']['picture']
             person_email = data[item]['person']['email']
+            # print(person_name)
             list_sub = []
             for sub in data[item]['member_sub']:
                 activity_name = sub['activity']['name']
                 is_expired = sub['is_expired']
+                # print(is_expired)
                 dicOfMember = {
                             'member_name': person_name,
                             'activity_name': activity_name,
@@ -519,6 +539,7 @@ class NotificationView(APIView):
                     if(not person_id in expired_subscriptions_id):
                         expired_subscriptions.append(data[item])
                         expired_subscriptions_id.append(person_id)
+                    # print(person_name)
                     list_sub.append(sub)
                     expired_subscriptions[len(expired_subscriptions) - 1]['member_sub'] = list_sub
                     person = Person.objects.get(id=person_id)
@@ -548,8 +569,8 @@ class DashboardView(APIView):
 
         totalNumberQueryset = Member.objects.all().count()
 
-        activityNumberQueryset = Subscription.objects.values('activity__name').annotate(number_of_people=Count('activity'))
-        totalNumberSerializer = DashboardNumberPeopleActivitySerializer(activityNumberQueryset, many=True)
+        # activityNumberQueryset = Subscription.objects.values('activity__name').annotate(number_of_people=Count('activity'))
+        # totalNumberSerializer = DashboardNumberPeopleActivitySerializer(activityNumberQueryset, many=True)
 
         genderNumberQueryset = Member.objects.values('person__gender').annotate(number_of_gender=Count('person'))
         genderNumberSerializer = DashboardNumberOfGenderSerializer(genderNumberQueryset, many=True)
@@ -562,7 +583,7 @@ class DashboardView(APIView):
             'totalMoney': totalPrice,
             'moneyByYear': priceSerializer.data,
             'totalNumber': totalNumberQueryset,
-            'numberOfActivity': totalNumberSerializer.data,
+            # 'numberOfActivity': totalNumberSerializer.data,
             'numberOfGender': genderNumberSerializer.data,
             'numberPeopleByActivity': numberPeopleByActivitySerializer.data
             }

@@ -79,7 +79,7 @@ class User(AbstractBaseUser):
     birthdate = models.DateField(default=datetime.date(2001, 1, 1), null=True, blank=True)
     otp = models.CharField(max_length=10, blank=True)
     picture = models.ImageField(upload_to='profileImage/%Y/%m/%d/', default='user.png', blank=True)
-    is_active = models.BooleanField(default=True)
+    # is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateField(null=True)
     # TimeEmail = models.DateField(blank=True, null=True)

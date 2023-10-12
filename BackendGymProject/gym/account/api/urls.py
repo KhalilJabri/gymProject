@@ -4,7 +4,7 @@ from .views import (UserLoginView, UserRegisterView, UserResetPasswordView, Send
                     VerifyOtpView, ModifyUserProfileView, UserChangePasswordView, AddGetMemberView, SpecificMemberView,
                     AddGetCoachView, SpecificCoachView, ActivityView, SpecificActivityView, GetUsersView,
                     ChangePermissionUserView,
-                    SubscriptionView, SpecificSubscriptionView, NotificationView, GetSpecificUserView, ActiveMemberView,
+                    SubscriptionView, SpecificSubscriptionView, NotificationView, GetSpecificUserView,
                     DashboardView, )
 
 urlpatterns = [
@@ -23,7 +23,7 @@ urlpatterns = [
 
     path('member/', AddGetMemberView.as_view(), name='add_get_member'),
     path('member/<int:pk>/', SpecificMemberView.as_view(), name='get_update_delete_specific_member'),
-    path('activeMember/<int:pk>/', ActiveMemberView.as_view(), name="change_member_status"),
+    # path('activeMember/<int:pk>/', ActiveMemberView.as_view(), name="change_member_status"),
 
     path('coach/', AddGetCoachView.as_view(), name='add_get_coach'),
     path('coach/<int:pk>/', SpecificCoachView.as_view(), name='get_update_dalete_specific_coach'),
@@ -35,7 +35,7 @@ urlpatterns = [
     path('subscription/<int:pk>/', SpecificSubscriptionView.as_view(), name='update_delete_subscription'),
 
     path('notification/', NotificationView.as_view(), name='notification'),
-    # path('dashboard/'),
-    path('subscriptions/sum-by-year/', DashboardView.as_view(), name='subscription-sum-by-year'),
+
+    path('dashboard/', DashboardView.as_view(), name='subscription-sum-by-year'),
 
 ]
