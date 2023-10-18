@@ -37,5 +37,6 @@ urlpatterns = [
     path('notification/', NotificationView.as_view(), name='notification'),
 
     path('dashboard/', DashboardView.as_view(), name='subscription-sum-by-year'),
+    # path('xx/', xx.as_view(), name='aaze'),
 
 ]

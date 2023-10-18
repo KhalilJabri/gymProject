@@ -180,11 +180,11 @@ class FirstSubscriptionSerializer(serializers.ModelSerializer):
             return False
 
 class AddGetMemberSerializer(serializers.ModelSerializer):
-    # person = FirstPersonMemberDetailsSerializer()
+    person = FirstPersonMemberDetailsSerializer()
     # member_sub = FirstSubscriptionSerializer(many=True)
     class Meta:
         model = Member
-        fields = ['id', 'person']
+        fields = ['id', 'person', 'member_sub']
         extra_kwargs = {
             'id': {'read_only': True},
             # 'person': {'read_only': True},

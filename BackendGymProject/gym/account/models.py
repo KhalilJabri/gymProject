@@ -11,6 +11,7 @@ from dateutil.relativedelta import relativedelta
 class Gym(models.Model):
     name = models.CharField(max_length=255)
     pictureGym = models.ImageField(upload_to='GymImg/%Y/%m/%d/', blank=True)
+    address = models.CharField(max_length=300)
 
     def __str__(self):
         return self.name
@@ -107,7 +108,7 @@ class Member(models.Model):
     person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='member_profile')
 
     def __str__(self):
-        return self.person.name
+        return str(self.person.id) + ' ' + self.person.name
 
 class Activity(models.Model):
     name = models.CharField(max_length=150, unique=True)
@@ -135,7 +136,7 @@ class Subscription(models.Model):
     startDate = models.DateField(default=timezone.now)
     numberOfSub = models.PositiveIntegerField()
     typeOfNumberSub = models.CharField(max_length=10, choices=TYPE_CHOICES)
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='member_sub')
+    member = models.ForeignKey(Member, on_delete=models.SET_NULL, related_name='member_sub', null=True)
     activity = models.ForeignKey(Activity, on_delete=models.SET_NULL, related_name='activity_sub', null=True)
 
     def __str__(self):
