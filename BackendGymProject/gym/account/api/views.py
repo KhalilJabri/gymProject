@@ -16,6 +16,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from django.db.models import F, Case, When, Value, DurationField, ExpressionWrapper
 from django.db.models import Max, F, Subquery, OuterRef
+from django.db.models.functions import ExtractMonth
 
 from ..models import User, Member, Coach, Person, Activity, Subscription, Gym
 from ..email import (send_otp_via_email, send_reminder_mail, send_greetings_mail_coach, send_greetings_mail_employee,
@@ -27,7 +28,7 @@ from .serializers import (LoginSerializer, RegisterUserSerializer, UserResetChan
                           ChangePermissionUserSerializer,SubscriptionSerializer, SpecificSubscriptionSerializer,
                           UpdateCoachSerializer, AddCoachSerializer, AddMemberSerializer,
                           NotificationsSerializer, GymSerializer, SpecificUserSerializer, DashboardNumberOfPeopleByActivitySerializer,
-                          DashboardMoneySerializer, DashboardNumberOfGenderSerializer,
+                          DashboardMoneySerializer, DashboardNumberOfGenderSerializer,DashboardnumberPeopleByActivityGenderSerializer,
                           )
 
 def get_tokens_for_user(user):
@@ -263,14 +264,9 @@ class AddGetMemberView(APIView):
 
         serializer = FirstSubscriptionSerializer(sub, many=True, context={"request": request})
         members_with_max_rest_days = []
-        # members_id_with_max_rest_days_activity = []
         members_id = []
-        # liste = []
 
         for subData in serializer.data:
-            # for i in range(len(members_with_max_rest_days)):
-            #     print(members_with_max_rest_days[i]['member']['id'])
-            # print('\n')
             if not subData['member']['id'] in members_id:
                 dicActivity = {}
                 liste = []
@@ -303,76 +299,7 @@ class AddGetMemberView(APIView):
                 if ok == False:
                     members_with_max_rest_days[index]['subscription'].append(members_with_activity)
 
-
-
-        # for sub_data in serializer.data:
-        #     if not sub_data['member']['id'] in members_id:
-        #         members_id.append(sub_data['member']['id'])
-        #         dicActivity['id'] = sub_data['id']
-        #         dicActivity
-        #         members_id_with_max_rest_days_activity['sub'].append()
-        #         members_with_max_rest_days.append(sub_data)
-        #     else:
-        #         index = members_id.index(sub_data['member']['id'])
-        #         if(sub_data['endDate'] > members_with_max_rest_days[index]['endDate']):
-        #             members_with_max_rest_days[index] = sub_data
-
         return Response({'message': 'data of members', 'data': members_with_max_rest_days}, status=status.HTTP_200_OK)
-
-        # queryset = Member.objects.all()
-        #
-        # if activity_name == '':
-        #     queryset = queryset.all()
-        # elif activity_name != 'all':
-        #     queryset = queryset.filter(member_sub__activity__name=activity_name)
-        #
-        # if search:
-        #     queryset = queryset.filter(person__name__icontains=search)
-        #
-        # if startDate == '':
-        #     queryset = queryset.all()
-        # elif startDate:
-        #     queryset = queryset.filter(startDate=startDate)
-        #
-        # if endDate:
-        #     aux = []
-        #     for item in queryset:
-        #         date_str = item.end_date.strftime("%Y-%m-%d")
-        #         if date_str == endDate:
-        #             aux.append(item)
-        #     queryset = aux
-        #
-        # if statusFilter == 'true':
-        #     aux = []
-        #     for item in queryset:
-        #         if item.end_date > timezone.now().date():
-        #             aux.append(item)
-        #     queryset = aux
-        # elif statusFilter == 'false':
-        #     aux = []
-        #     for item in queryset:
-        #         if item.end_date <= timezone.now().date():
-        #             aux.append(item)
-        #     queryset = aux
-        #
-        #
-        # serializer = AddGetMemberSerializer(queryset, many=True)
-        # newData = []
-        # id_subscription = []
-        # # for item in serializer.data:
-        # #     if
-        # max_end_dates_subquery = Subscription.objects.filter(
-        #     activity=OuterRef('activity'),
-        #     member=OuterRef('member')
-        # ).values('activity').annotate(
-        #     max_end_date=Max('endDate')
-        # ).values('max_end_date')
-        #
-        # # Query to retrieve the subscriptions with the maximum endDate for each activity by members.
-        # subscriptions = Subscription.objects.filter(
-        #     endDate=Subquery(max_end_dates_subquery),
-        # )
-        # return Response(subscriptions, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
         serializer = AddMemberSerializer(data=request.data)
@@ -701,22 +628,39 @@ class DashboardView(APIView):
 
         totalNumberQueryset = Member.objects.all().count()
 
-        # activityNumberQueryset = Subscription.objects.values('activity__name').annotate(number_of_people=Count('activity'))
-        # totalNumberSerializer = DashboardNumberPeopleActivitySerializer(activityNumberQueryset, many=True)
-
         genderNumberQueryset = Member.objects.values('person__gender').annotate(number_of_gender=Count('person'))
         genderNumberSerializer = DashboardNumberOfGenderSerializer(genderNumberQueryset, many=True)
 
         numberPeopleByActivityQueryset = Subscription.objects.values('activity__name').annotate(number=Count(Cast('member', IntegerField()), distinct=True))
         numberPeopleByActivitySerializer = DashboardNumberOfPeopleByActivitySerializer(numberPeopleByActivityQueryset, many=True)
 
+        numberPeopleByActivityGenderQueryset = Subscription.objects.values('activity__name', 'member__person__gender').annotate(number=Count(Cast('member', IntegerField()), distinct=True))
+        numberPeopleByActivityGenderSerializer = DashboardnumberPeopleByActivityGenderSerializer(numberPeopleByActivityGenderQueryset, many=True)
+
         data = {
             # 'x': x,
             'totalMoney': totalPrice,
             'moneyByYear': priceSerializer.data,
             'totalNumber': totalNumberQueryset,
-            # 'numberOfActivity': totalNumberSerializer.data,
             'numberOfGender': genderNumberSerializer.data,
-            'numberPeopleByActivity': numberPeopleByActivitySerializer.data
+            'numberPeopleByActivity': numberPeopleByActivitySerializer.data,
+            'numberPeopleByActivityGender': numberPeopleByActivityGenderSerializer.data,
             }
         return Response({'message': 'dashboard data', 'data': data}, status=status.HTTP_200_OK)
+
+class DashboardMoneyByMonthByYearView(APIView):
+    def get(self, request):
+        current_year = datetime.now(tz=timezone.utc).year
+        FilterByYear = request.GET.get('year', current_year)
+
+        queryset = Subscription.objects.filter(startDate__year=FilterByYear).values('startDate__month').annotate(price=Sum('price'))
+        # total_price_by_month = Subscription.objects.filter(startDate__year=FilterByYear).annotate(month=ExtractMonth('startDate')).values('month').annotate(total_price=Sum('price')).order_by('month')
+        return Response({'message': 'prices by month by year','data': queryset}, status=status.HTTP_200_OK)
+
+class DashboardMoneyByActivityByYearView(APIView):
+    def get(self, request):
+        current_year = datetime.now(tz=timezone.utc).year
+        FilterByYear = request.GET.get('year', current_year)
+
+        queryset = Subscription.objects.filter(startDate__year=FilterByYear).values('activity__name').annotate(price=Sum('price'))
+        return Response({'message': 'prices by month by year','data': queryset}, status=status.HTTP_200_OK)

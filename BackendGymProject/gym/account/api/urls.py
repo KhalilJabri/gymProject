@@ -3,7 +3,7 @@ from django.urls import path
 from .views import (UserLoginView, UserRegisterView, UserResetPasswordView, SendOtpView,
                     VerifyOtpView, ModifyUserProfileView, UserChangePasswordView, AddGetMemberView, SpecificMemberView,
                     AddGetCoachView, SpecificCoachView, ActivityView, SpecificActivityView, GetUsersView,
-                    ChangePermissionUserView,
+                    ChangePermissionUserView, DashboardMoneyByMonthByYearView, DashboardMoneyByActivityByYearView,
                     SubscriptionView, SpecificSubscriptionView, NotificationView, GetSpecificUserView,
                     DashboardView, )
 
@@ -36,7 +36,8 @@ urlpatterns = [
 
     path('notification/', NotificationView.as_view(), name='notification'),
 
-    path('dashboard/', DashboardView.as_view(), name='subscription-sum-by-year'),
-    # path('xx/', xx.as_view(), name='aaze'),
+    path('dashboard/', DashboardView.as_view(), name='dashboard'),
+    path('dashboardMoneyMonth/', DashboardMoneyByMonthByYearView.as_view(), name='get_dashboard_money_by_Month_by_year'),
+    path('dashboardMoneyActivity/', DashboardMoneyByActivityByYearView.as_view(), name='get_dashboard_money_by_activity_by_year'),
 
 ]

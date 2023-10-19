@@ -359,3 +359,8 @@ class DashboardNumberOfGenderSerializer(serializers.Serializer):
 class DashboardNumberOfPeopleByActivitySerializer(serializers.Serializer):
     activityName = serializers.CharField(source='activity__name')
     numberOfMember = serializers.IntegerField(source='number')
+
+class DashboardnumberPeopleByActivityGenderSerializer(serializers.Serializer):
+    activityName = serializers.CharField(source="activity__name")
+    genderType = serializers.CharField(source="member__person__gender")
+    numberOfMember = serializers.IntegerField(source="number")
