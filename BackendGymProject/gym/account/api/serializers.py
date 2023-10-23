@@ -127,7 +127,7 @@ class FirstPersonMemberDetailsSerializer(serializers.ModelSerializer):
     picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
     class Meta:
         model = Person
-        fields = ['name', 'gender', 'is_active', 'picture']
+        fields = ['name', 'gender', 'picture']
 
 class FirstActivitySerializer(serializers.ModelSerializer):
     class Meta:
@@ -153,7 +153,7 @@ class FirstSubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
-        fields = ['id', 'endDate', 'status', 'activity', 'member']
+        fields = ['id', 'startDate', 'endDate', 'status', 'activity', 'member', 'startDate']
 
     def get_endDate(self, data):
         global endDate
@@ -164,6 +164,7 @@ class FirstSubscriptionSerializer(serializers.ModelSerializer):
         elif (data.typeOfNumberSub == 'day'):
             endDate = data.startDate + relativedelta(days=data.numberOfSub)
         # rest_days = (endDate - datetime.now().date()).days
+        endDate = endDate.strftime("%d-%m-%Y")
         return endDate
 
     def get_status(self, data):

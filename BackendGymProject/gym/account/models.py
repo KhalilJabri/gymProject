@@ -5,13 +5,12 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator
 from dateutil.relativedelta import relativedelta
 
-# class TimeSendEmail(models.Model):
-#     timeEmail = models.DateField()
-
 class Gym(models.Model):
     name = models.CharField(max_length=255)
     pictureGym = models.ImageField(upload_to='GymImg/%Y/%m/%d/', blank=True)
-    address = models.CharField(max_length=300)
+    address = models.CharField(max_length=300, blank=True)
+    linkFacebook = models.URLField(null=True, default='#')
+    linkInstagram = models.URLField(null=True, default='#')
 
     def __str__(self):
         return self.name
@@ -32,7 +31,7 @@ class Person(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     picture = models.ImageField(upload_to='storeImg/%Y/%m/%d/', default='user.png', blank=True)
     TimeEmail = models.DateField(blank=True, null=True)
-    is_active = models.BooleanField(default=True)
+    # is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
@@ -80,7 +79,7 @@ class User(AbstractBaseUser):
     birthdate = models.DateField(default=datetime.date(2001, 1, 1), null=True, blank=True)
     otp = models.CharField(max_length=10, blank=True)
     picture = models.ImageField(upload_to='profileImage/%Y/%m/%d/', default='user.png', blank=True)
-    # is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateField(null=True)
     # TimeEmail = models.DateField(blank=True, null=True)

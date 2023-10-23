@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from django.shortcuts import render
 import random
 import string
@@ -11,12 +12,7 @@ from django.utils import timezone
 from django.db.models import Sum, Count
 from django.db.models.functions import Cast
 from django.db.models import IntegerField
-from rest_framework import filters
-from dateutil.relativedelta import relativedelta
 from datetime import datetime
-from django.db.models import F, Case, When, Value, DurationField, ExpressionWrapper
-from django.db.models import Max, F, Subquery, OuterRef
-from django.db.models.functions import ExtractMonth
 
 from ..models import User, Member, Coach, Person, Activity, Subscription, Gym
 from ..email import (send_otp_via_email, send_reminder_mail, send_greetings_mail_coach, send_greetings_mail_employee,
@@ -62,7 +58,17 @@ class UserLoginView(APIView):
         return Response({'message': 'something went wrong!', 'error': serializer.errors},
                         status=status.HTTP_400_BAD_REQUEST)
 
+class LogoutView(APIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Log the user out by ending the session or deleting the token
+        logout(request)
+        return Response(status=status.HTTP_200_OK)
+
 class ChangePermissionUserView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
     def put(self, request, pk):
         try:
             user_active = User.objects.get(id=pk)
@@ -77,6 +83,7 @@ class ChangePermissionUserView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 class UserRegisterView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
     def post(self, request):
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
@@ -129,22 +136,25 @@ class SendOtpView(APIView):
 
 class VerifyOtpView(APIView):
     def post(self, request):
-        serializer = VerifyOtpSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                user = User.objects.get(email=serializer.data['email'])
-            except User.DoesNotExist:
-                return Response({'message': 'user not found:'}, status=status.HTTP_404_NOT_FOUND)
-            otp = serializer.data.get('otp')
-            if user.otp != otp or len(otp) == 0:
-                return Response({'message': 'invalid otp!'}, status=status.HTTP_404_NOT_FOUND)
-            else:
-                return Response({'message': 'otp correct'}, status=status.HTTP_200_OK)
+        try:
+            serializer = VerifyOtpSerializer(data=request.data)
+            if serializer.is_valid():
+                try:
+                    user = User.objects.get(email=serializer.data['email'])
+                except User.DoesNotExist:
+                    return Response({'message': 'user not found:'}, status=status.HTTP_404_NOT_FOUND)
+                otp = serializer.data.get('otp')
+                if user.otp != otp or len(otp) == 0:
+                    return Response({'message': 'invalid otp!'}, status=status.HTTP_404_NOT_FOUND)
+                else:
+                    return Response({'message': 'otp correct'}, status=status.HTTP_200_OK)
 
-        return Response({'message': 'something went wrong!', 'error': serializer.errors}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'something went wrong!', 'error': serializer.errors}, status=status.HTTP_404_NOT_FOUND)
+        except:
+            Response({'message': 'bad request 500'}, status=status.HTTP_502_BAD_GATEWAY)
 
 class UserChangePasswordView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     def put(self, request, pk):
         try:
             user = User.objects.get(id=pk)
@@ -173,8 +183,13 @@ class UserResetPasswordView(APIView):
         return Response({'message': 'something went wrong!', 'error': serializer.errors}, status=status.HTTP_404_NOT_FOUND)
 
 class ModifyUserProfileView(APIView):
+    # permission_classes = [IsAuthenticated]
     def patch(self, request, pk):
         try:
+            user_id = request.user.id
+            if pk != user_id:
+                return Response({'message': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
+
             try:
                 user = User.objects.get(id=pk)
             except User.DoesNotExist:
@@ -188,6 +203,9 @@ class ModifyUserProfileView(APIView):
         except:
             return Response({'message': '???'}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class DeleteSpecificUser(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
     def delete(self, request, pk):
         try:
             user = User.objects.get(id=pk)
@@ -196,20 +214,25 @@ class ModifyUserProfileView(APIView):
         user.delete()
         return Response({'message': 'user deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
+
 class GetUsersView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
     def get(self, request):
         search = request.GET.get('search', '')
-
+        # user_id = request.user.id
         if len(search) != 0:
             users = User.objects.filter(name__icontains=search)
+            # users = User.objects.filter(name__icontains=search, id!=user_id)
         else:
             users = User.objects.all()
+            # users = User.objects.filter(id!=user_id)
 
         serializer = UsersSerializer(users, many=True, context={"request": request})
 
         return Response({'message': 'all users', 'data': serializer.data}, status=status.HTTP_200_OK)
 
 class GetSpecificUserView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
     def get(self, request, pk):
         try:
             user = User.objects.get(id=pk)
@@ -219,6 +242,7 @@ class GetSpecificUserView(APIView):
         return Response({'message': 'user exist', 'data': serializer.data}, status=status.HTTP_200_OK)
 
 class AddGetMemberView(APIView):
+    # permission_classes = [IsAuthenticated]
     def get(self, request, format=None):
         activity_name = request.GET.get('activity_name', '')
         search = request.GET.get('search', '')
@@ -227,40 +251,41 @@ class AddGetMemberView(APIView):
         statusFilter = request.GET.get('status', '')
 
         sub = Subscription.objects.all()
+        # sub = Subscription.objects.filter(member__person__is_deleted=False)
 
         if activity_name == '':
             sub = sub.all()
         elif activity_name != 'all':
             sub = sub.filter(activity__name=activity_name)
-
+        #
         if search:
             sub = sub.filter(member__person__name__icontains=search)
+        #
+        # if startDate == '':
+        #     sub = sub.all()
+        # elif startDate:
+        #     sub = sub.filter(startDate=startDate)
+        #
+        # if endDate:
+        #     aux = []
+        #     for item in sub:
+        #         date_str = item.end_date.strftime("%Y-%m-%d")
+        #         if date_str == endDate:
+        #             aux.append(item)
+        #     sub = aux
 
-        if startDate == '':
-            sub = sub.all()
-        elif startDate:
-            sub = sub.filter(startDate=startDate)
-
-        if endDate:
-            aux = []
-            for item in sub:
-                date_str = item.end_date.strftime("%Y-%m-%d")
-                if date_str == endDate:
-                    aux.append(item)
-            sub = aux
-
-        if statusFilter == 'true':
-            aux = []
-            for item in sub:
-                if item.end_date > timezone.now().date():
-                    aux.append(item)
-            sub = aux
-        elif statusFilter == 'false':
-            aux = []
-            for item in sub:
-                if item.end_date <= timezone.now().date():
-                    aux.append(item)
-            sub = aux
+        # if statusFilter == 'true':
+        #     aux = []
+        #     for item in sub:
+        #         if item.end_date > timezone.now().date():
+        #             aux.append(item)
+        #     sub = aux
+        # elif statusFilter == 'false':
+        #     aux = []
+        #     for item in sub:
+        #         if item.end_date <= timezone.now().date():
+        #             aux.append(item)
+        #     sub = aux
 
         serializer = FirstSubscriptionSerializer(sub, many=True, context={"request": request})
         members_with_max_rest_days = []
@@ -299,7 +324,71 @@ class AddGetMemberView(APIView):
                 if ok == False:
                     members_with_max_rest_days[index]['subscription'].append(members_with_activity)
 
-        return Response({'message': 'data of members', 'data': members_with_max_rest_days}, status=status.HTTP_200_OK)
+        subValue = members_with_max_rest_days
+        # if activity_name == '':
+        #     subValue = subValue
+        # elif activity_name != 'all':
+        #     sub = []
+        #     for item in subValue:
+        #         for itemSub in item['subscription']:
+        #             if itemSub['activity']['name'] == activity_name:
+        #                 sub.append(item)
+        #     subValue = sub
+
+        # if search:
+        #     sub = []
+        #     for item in subValue:
+        #         if search in item['member']['person']['name']:
+        #             sub.append(item)
+        #     subValue = sub
+            # sub = sub.filter(member__person__name__icontains=search)
+
+        if startDate == '':
+            subValue = subValue
+        elif startDate:
+            aux = []
+            for item in subValue:
+                for itemSub in item['subscription']:
+                    if itemSub['startDate'] == startDate:
+                        aux.append(item)
+            subValue = aux
+            # sub = sub.filter(startDate=startDate)
+
+        if endDate:
+            aux = []
+            for item in subValue:
+                for itemSub in item['subscription']:
+                    # date_str = datetime.strftime(itemSub['endDate'], "%Y-%m-%d")
+                    # date_str = itemSub['endDate']
+                    # Convert the date string to a datetime object
+                    date_obj = datetime.strptime(itemSub['endDate'], "%d-%m-%Y")
+                    date_str = date_obj.strftime("%Y-%m-%d")
+                    if date_str == endDate:
+                        aux.append(item)
+            subValue = aux
+
+        if statusFilter == 'true':
+            aux = []
+            i = 0
+            for item in subValue:
+                i +=1
+                for itemSub in item['subscription']:
+                    end_date_str = itemSub['endDate']
+                    end_date = datetime.strptime(end_date_str, "%d-%m-%Y").date()
+                    if end_date > timezone.now().date():
+                        aux.append(item)
+            subValue = aux
+        elif statusFilter == 'false':
+            aux = []
+            for item in subValue:
+                for itemSub in item['subscription']:
+                    end_date_str = itemSub['endDate']
+                    end_date = datetime.strptime(end_date_str, "%d-%m-%Y").date()
+                    if end_date <= timezone.now().date():
+                        aux.append(item)
+            subValue = aux
+
+        return Response({'message': 'data of members', 'data': subValue}, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
         serializer = AddMemberSerializer(data=request.data)
@@ -348,7 +437,7 @@ class AddGetMemberView(APIView):
         return Response({'message': 'something wrong with Person or subscription model', 'error': serializer.errors},
                         status=status.HTTP_400_BAD_REQUEST)
 
-# class ActiveMemberView(APIView):
+# class DeletedMemberView(APIView):
 #     def put(self, request, pk):
 #         try:
 #             activeMember = Member.objects.get(id=pk)
@@ -362,6 +451,7 @@ class AddGetMemberView(APIView):
 #             return Response({'message': 'something wrong!!'}, status=status.HTTP_400_BAD_REQUEST)
 
 class SpecificMemberView(APIView):
+    # permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         try:
             try:
@@ -397,13 +487,16 @@ class SpecificMemberView(APIView):
             return Response({'message': 'Member not found'}, status=status.HTTP_404_NOT_FOUND)
         person = member.person
         if person:
-            person.delete()
+            person.is_deleted = True
+            person.save()
+            # person.delete()
             return Response({'message': 'Person associated with Member deleted successfully'},
                             status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({'message': 'No associated Person found for Member'}, status=status.HTTP_404_NOT_FOUND)
 
 class AddGetCoachView(APIView):
+    # permission_classes = [IsAuthenticated]
     def get(self, request):
         search = request.GET.get('search', '')
         if len(search) != 0:
@@ -454,6 +547,7 @@ class AddGetCoachView(APIView):
         return Response({'message': 'something wrong with data', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class SpecificCoachView(APIView):
+    # permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         try:
             try:
@@ -491,6 +585,7 @@ class SpecificCoachView(APIView):
             return Response({'message': 'No associated Person found for Coach'}, status=status.HTTP_404_NOT_FOUND)
 
 class SubscriptionView(APIView):
+    # permission_classes = [IsAuthenticated]
     def post(self, request, format=None):
         serialiser = SubscriptionSerializer(data=request.data)
         if serialiser.is_valid():
@@ -500,6 +595,7 @@ class SubscriptionView(APIView):
             return Response({'message': 'something wrong with subscription model', 'error': serialiser.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class SpecificSubscriptionView(APIView):
+    # permission_classes = [IsAuthenticated]
     def put(self, request, pk, format=None):
         try:
             subscription = Subscription.objects.get(id=pk)
@@ -521,6 +617,7 @@ class SpecificSubscriptionView(APIView):
         return Response({'message': 'subscription deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 class ActivityView(APIView):
+    # permission_classes = [IsAuthenticated]
     def get(self, request, format=None):
         activities = Activity.objects.all()
         if activities.exists():
@@ -541,6 +638,7 @@ class ActivityView(APIView):
             return Response({'message': 'something wrong with activity fields', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class SpecificActivityView(APIView):
+    # permission_classes = [IsAuthenticated]
     def get(self, request, pk, format=None):
         try:
             activity = Activity.objects.get(id=pk)
@@ -572,6 +670,7 @@ class SpecificActivityView(APIView):
         return Response({'message': 'activity deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 class NotificationView(APIView):
+    # permission_classes = [IsAuthenticated]
     def get(self, request):
         notificationMember = Member.objects.all()
         serializer = NotificationsSerializer(notificationMember, many=True, context={"request": request})
@@ -617,6 +716,7 @@ class NotificationView(APIView):
         return Response({'message': 'notification send it', 'data': expired_subscriptions}, status=status.HTTP_200_OK)
 
 class DashboardView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
     def get(self, request, format=None):
         # x = Subscription.objects.values('startDate__year').annotate(total_price=Sum('price')).filter(total_price__gt=90)
 
@@ -649,6 +749,7 @@ class DashboardView(APIView):
         return Response({'message': 'dashboard data', 'data': data}, status=status.HTTP_200_OK)
 
 class DashboardMoneyByMonthByYearView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
     def get(self, request):
         current_year = datetime.now(tz=timezone.utc).year
         FilterByYear = request.GET.get('year', current_year)
@@ -658,6 +759,7 @@ class DashboardMoneyByMonthByYearView(APIView):
         return Response({'message': 'prices by month by year','data': queryset}, status=status.HTTP_200_OK)
 
 class DashboardMoneyByActivityByYearView(APIView):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
     def get(self, request):
         current_year = datetime.now(tz=timezone.utc).year
         FilterByYear = request.GET.get('year', current_year)
