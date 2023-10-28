@@ -4,13 +4,14 @@ import datetime
 from django.utils import timezone
 from django.core.validators import MinValueValidator
 from dateutil.relativedelta import relativedelta
+from django.core.validators import FileExtensionValidator
 
 class Gym(models.Model):
     name = models.CharField(max_length=255)
     pictureGym = models.ImageField(upload_to='GymImg/%Y/%m/%d/', blank=True)
     address = models.CharField(max_length=300, blank=True)
-    linkFacebook = models.URLField(null=True, default='#')
-    linkInstagram = models.URLField(null=True, default='#')
+    linkFacebook = models.URLField(null=True, default='#', blank=True)
+    linkInstagram = models.URLField(null=True, default='#', blank=True)
 
     def __str__(self):
         return self.name

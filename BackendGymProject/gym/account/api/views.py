@@ -13,7 +13,9 @@ from django.db.models import Sum, Count
 from django.db.models.functions import Cast
 from django.db.models import IntegerField
 from datetime import datetime
+from django.urls import reverse
 
+from .pagination import SubscribersPagnation
 from ..models import User, Member, Coach, Person, Activity, Subscription, Gym
 from ..email import (send_otp_via_email, send_reminder_mail, send_greetings_mail_coach, send_greetings_mail_employee,
                      send_greetings_mail_Member)
@@ -22,7 +24,7 @@ from .serializers import (LoginSerializer, RegisterUserSerializer, UserResetChan
                           MngPersonMemberSerializer, MngPersonCoachSerializer, CoachSerializer, ActivitySerializer,
                           FirstSubscriptionSerializer,UpdateMemberSerializer,GetSpecificMemberSerialiser, UsersSerializer,
                           ChangePermissionUserSerializer,SubscriptionSerializer, SpecificSubscriptionSerializer,
-                          UpdateCoachSerializer, AddCoachSerializer, AddMemberSerializer,
+                          UpdateCoachSerializer, AddCoachSerializer, AddMemberSerializer, test,
                           NotificationsSerializer, GymSerializer, SpecificUserSerializer, DashboardNumberOfPeopleByActivitySerializer,
                           DashboardMoneySerializer, DashboardNumberOfGenderSerializer,DashboardnumberPeopleByActivityGenderSerializer,
                           )
@@ -207,12 +209,16 @@ class ModifyUserProfileView(APIView):
 class DeleteSpecificUser(APIView):
     # permission_classes = [IsAuthenticated, IsAdminUser]
     def delete(self, request, pk):
+        # user_id = request.user.id
         try:
             user = User.objects.get(id=pk)
         except User.DoesNotExist:
             return Response({'message': 'user not found'}, status=status.HTTP_404_NOT_FOUND)
+        # if user.id != user_id:
         user.delete()
         return Response({'message': 'user deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        # else:
+        #     return Response({'message': 'u cannot delete yourself'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class GetUsersView(APIView):
@@ -243,15 +249,45 @@ class GetSpecificUserView(APIView):
 
 class AddGetMemberView(APIView):
     # permission_classes = [IsAuthenticated]
-    def get(self, request, format=None):
+    # pagination_class = SubscribersPagnation
+
+    # @property
+    # def paginator(self):
+    #     if not hasattr(self, '_paginator'):
+    #         if self.pagination_class is None:
+    #             self._paginator = None
+    #         else:
+    #             self._paginator = self.pagination_class()
+    #     else:
+    #         pass
+    #     return self._paginator
+    #
+    # def paginate_queryset(self, queryset):
+    #
+    #     if self.paginator is None:
+    #         return None
+    #     return self.paginator.paginate_queryset(queryset,
+    #                                             self.request, view=self)
+    #
+    # def get_paginated_response(self, data):
+    #     assert self.paginator is not None
+    #     return self.paginator.get_paginated_response(data)
+
+    def get(self, request, format=None, *args, **kwargs):
         activity_name = request.GET.get('activity_name', '')
         search = request.GET.get('search', '')
         startDate = request.GET.get('startDate', '')
         endDate = request.GET.get('endDate', '')
         statusFilter = request.GET.get('status', '')
+        page = self.request.GET.get('page', '')
 
         sub = Subscription.objects.all()
-        # sub = Subscription.objects.filter(member__person__is_deleted=False)
+
+        # if page is not None:
+        #     paginator = self.pagination_class()
+        #     paginated_data = paginator.paginate_queryset(sub, self.request)
+        #     # serializer = FirstSubscriptionSerializer(paginated_data, many=True, context={"request": request})
+        #     return paginator.get_paginated_response(serializer.data)
 
         if activity_name == '':
             sub = sub.all()
@@ -287,6 +323,7 @@ class AddGetMemberView(APIView):
         #             aux.append(item)
         #     sub = aux
 
+        # serializer = NewsItemSerializer(results, many=True)
         serializer = FirstSubscriptionSerializer(sub, many=True, context={"request": request})
         members_with_max_rest_days = []
         members_id = []
@@ -388,7 +425,49 @@ class AddGetMemberView(APIView):
                         aux.append(item)
             subValue = aux
 
-        return Response({'message': 'data of members', 'data': subValue}, status=status.HTTP_200_OK)
+        # serializer_test = test(subValue, many=True, context={"request": request})
+        data_list = subValue  # Replace with your list of data
+
+        # Get the requested page number and set the page size to 2
+        page_number = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 10))
+
+        # Calculate the start and end indices for pagination
+        start_index = (page_number - 1) * page_size
+        end_index = start_index + page_size
+
+        # Paginate the data
+        paginated_data = data_list[start_index:end_index]
+
+        # Calculate the total number of pages
+        total_items = len(data_list)
+        num_pages = (total_items + page_size - 1) // page_size
+
+        # Calculate next and previous page numbers
+        next_page = page_number + 1 if page_number < num_pages else None
+        previous_page = page_number - 1 if page_number > 1 else None
+
+        # Create URLs for next and previous pages
+        base_url = reverse('add_get_member')  # Replace with the actual name of your API view
+        next_page_url = None
+        previous_page_url = None
+
+        if next_page:
+            next_page_url = f"{base_url}?page={next_page}&page_size={page_size}"
+        if previous_page:
+            previous_page_url = f"{base_url}?page={previous_page}&page_size={page_size}"
+
+        # Construct the response
+        response_data = {
+            'next': next_page_url,
+            'previous': previous_page_url,
+            'count': total_items,
+            'results': paginated_data,
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
+
+        # return Response({'message': 'data of members', 'data': subValue}, status=status.HTTP_200_OK)
+
 
     def post(self, request, format=None):
         serializer = AddMemberSerializer(data=request.data)
@@ -615,6 +694,47 @@ class SpecificSubscriptionView(APIView):
             return Response({'message': 'subscription not found'}, status=status.HTTP_404_NOT_FOUND)
         subscription.delete()
         return Response({'message': 'subscription deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+class GymView(APIView):
+    def get(self, request, format=None):
+        gym = Gym.objects.all().first()
+        serializer = GymSerializer(gym, context={"request": request})
+        return Response({'message': 'gym exist', 'data': serializer.data}, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        gym = Gym.objects.all()
+        if len(gym) == 0:
+            serializer = GymSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'message': 'gym is created', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'message': 'something wrong with gym data', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            serializer = GymSerializer(gym, many=True)
+            return Response({'message': 'data gym already exist', 'data': serializer.data},status=status.HTTP_400_BAD_REQUEST)
+
+
+class SpecificGymView(APIView):
+    def get(self, request, pk, format=None):
+        try:
+            gym = Gym.objects.get(id=pk)
+        except Gym.DoesNotExist:
+            return Response({'message': 'gym not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = GymSerializer(gym, context={"request": request})
+        return Response({'message': 'gym exist', 'data': serializer.data}, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        try:
+            gym = Gym.objects.get(id=pk)
+        except Gym.DoesNotExist:
+            return Response({'message': 'gym not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = GymSerializer(gym, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'gym is updated', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'message': 'something wrong with update gym', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class ActivityView(APIView):
     # permission_classes = [IsAuthenticated]

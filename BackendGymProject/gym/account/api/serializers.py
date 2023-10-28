@@ -11,6 +11,9 @@ class GymSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gym
         fields = '__all__'
+        extra_kwargs = {
+            "id": {"read_only": "true"}
+        }
 
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
@@ -365,3 +368,41 @@ class DashboardnumberPeopleByActivityGenderSerializer(serializers.Serializer):
     activityName = serializers.CharField(source="activity__name")
     genderType = serializers.CharField(source="member__person__gender")
     numberOfMember = serializers.IntegerField(source="number")
+
+class xx(serializers.ModelSerializer):
+    endDate = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    # member = MemberTableSerializer()
+    activity = FirstActivitySerializer()
+
+    class Meta:
+        model = Subscription
+        fields = ['id', 'startDate', 'endDate', 'status', 'activity', 'startDate']
+
+    def get_endDate(self, data):
+        global endDate
+        if data.get('typeOfNumberSub') == 'year':
+            endDate = data['startDate'] + relativedelta(years=data['numberOfSub'])
+        elif data.get('typeOfNumberSub') == 'month':
+            endDate = data['startDate'] + relativedelta(months=data['numberOfSub'])
+        elif data.get('typeOfNumberSub') == 'day':
+            endDate = data['startDate'] + relativedelta(days=data['numberOfSub'])
+
+        return endDate
+
+    def get_status(self, data):
+        global endDate
+        if data.get('typeOfNumberSub') == 'year':
+            endDate = data['startDate'] + relativedelta(years=data['numberOfSub'])
+        elif data.get('typeOfNumberSub') == 'month':
+            endDate = data['startDate'] + relativedelta(months=data['numberOfSub'])
+        elif data.get('typeOfNumberSub') == 'day':
+            endDate = data['startDate'] + relativedelta(days=data['numberOfSub'])
+        if endDate > timezone.now().date():
+            return True
+        else:
+            return False
+
+class test(serializers.Serializer):
+    member = MemberTableSerializer()
+    subscription = xx(many=True)
