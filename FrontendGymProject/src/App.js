@@ -1,12 +1,27 @@
 import React, {useState, useEffect} from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import {Header, Footer, Sidebar,Navbar} from './components'
-import {Home, Employees, Subscribers, Coaches, SubActivity} from './pages'
+import {Home, Employees, Coaches, Subscribers,ManageActivity,ManageGym} from './pages/index.jsx'
 import { useStateContext } from './contexts/ContextProvider'
+import {link} from './Connection/link'
 import './App.css'
 
 const App = () => {
-  const {activeMenu} = useStateContext();
+  const {activeMenu,listNotif,setListNotif} = useStateContext();
+
+    const fetchNotifData = async() =>{
+        const response = await fetch(`${link}/account/notification/`,{
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json',
+            },})
+            const resData = await response.json();
+            setListNotif(resData["data"]);
+    }
+    useEffect(()=>{
+      fetchNotifData();
+    },[])
+    
 
   return (
     <div>
@@ -35,8 +50,10 @@ const App = () => {
                   {/* pages */}
                   <Route path="/employees" element={<Employees />} />
                   <Route path="/coaches" element={<Coaches />} />
-                  <Route path="/subscribers" element={<Subscribers />} />
-                  <Route path="/subscribers/:name" element={<SubActivity />} />
+                  <Route path="/subscribers/:param" element={<Subscribers />} />
+                  {/*settings */}
+                  <Route path="/ManageActivity" element={<ManageActivity />} />
+                  <Route path="/ManageGym" element={<ManageGym />} />
                 </Routes>
               </div>
             </div>

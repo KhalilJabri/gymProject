@@ -7,6 +7,8 @@ export { default as EmployeeDetails } from './EmployeeDetails';
 export { default as SubscriberDetails } from './SubscriberDetails';
 export { default as Notification } from './Notification';
 export { default as UserProfile } from './UserProfile';
+export { default as EditGym } from './EditGym';
+
 
 
 

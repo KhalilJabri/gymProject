@@ -29,7 +29,8 @@ module.exports = {
         thr:'320px',
       },
       boxShadow :{
-        xs: '1px 1px 5px 1px rgba(0,0,0,0.2);'
+        xs: '1px 1px 5px 1px rgba(0,0,0,0.2);',
+        sh1:'1px 1px 3px 1px rgba(0,0,0,0.2);',
       },
       backgroundColor: {
         'main-bg': '#FAFBFB',
