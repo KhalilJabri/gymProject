@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Email Sample</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="cailon.css" />
+    <link rel="stylesheet" href="css/robotonewfont.css" />
+    <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet" type="text/css">
+    <style>
+        /* Reset some default styles */
+        html, body, h1, h3, p {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Global styles */
+        body {
+            font-family: 'Montserrat', 'Roboto', Helvetica, Arial, sans-serif;
+            background-color: rgb(136, 189, 191);
+        }
+
+        .form {
+            background: rgb(243, 243, 243);
+            padding: 40px;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        .centerImg {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+
+        .form-small {
+            background: white;
+            padding: 40px;
+            max-width: 600px;
+            margin: 10px auto;
+        }
+
+        .h1-font {
+            font-family: 'Lobster', cursive;
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+
+        .contact-font {
+            font-family: 'Indie Flower', cursive;
+            font-style: italic;
+            text-align: center;
+            color: rgb(111, 111, 111);
+        }
+
+        .p-font {
+            margin: 20px 10px 20px;
+            font-size: 20px;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 500;
+        }
+
+        .p-footer {
+            margin: 20px 10px 20px;
+            padding: 10px 50px 0px;
+            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+        }
+
+        /* Button styles */
+        :root {
+            --bg: rgb(243, 243, 243);
+            --color: rgb(255, 178, 0);
+            --font: Montserrat, Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .button {
+            display: inline-block;
+            text-align: center;
+            background: var(--color);
+            color: var(--bg);
+            font-weight: bold;
+            padding: 1.18em 1.32em 1.03em;
+            line-height: 1;
+            border-radius: 1em;
+            position: relative;
+            min-width: 8.23em;
+            text-decoration: none;
+            font-family: var(--font);
+            font-size: 1.75rem;
+        }
+
+        .button:before,
+        .button:after {
+            width: 4.4em;
+            height: 2.95em;
+            position: absolute;
+            content: "";
+            display: inline-block;
+            background: var(--color);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            transform: scale(0);
+            z-index: -1;
+        }
+
+        .button:before {
+            top: -25%;
+            left: 20%;
+        }
+
+        .button:after {
+            bottom: -25%;
+            right: 20%;
+        }
+
+        .button:hover:before,
+        .button:hover:after {
+            transform: none;
+        }
+
+        /* Social button styles */
+        .social-buttons {
+            margin: auto;
+            font-size: 0;
+            text-align: center;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .social-button {
+            display: inline-block;
+            background-color: #fff;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            margin: 0 10px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            opacity: 0.99;
+            border-radius: 50%;
+            box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.35s cubic-bezier(0.31, -0.105, 0.43, 1.59);
+        }
+
+        .social-button:before {
+            content: '';
+            background-color: #000;
+            width: 120%;
+            height: 120%;
+            position: absolute;
+            top: 90%;
+            left: -110%;
+            transform: rotate(45deg);
+            transition: all 0.35s cubic-bezier(0.31, -0.105, 0.43, 1.59);
+        }
+
+        .social-button .fa {
+            font-size: 38px;
+            vertical-align: middle;
+            transform: scale(0.8);
+            transition: all 0.35s cubic-bezier(0.31, -0.105, 0.43, 1.59);
+        }
+
+        /* Facebook button styles */
+        .social-button.facebook:before {
+            background-color: #3B5998;
+        }
+
+        .social-button.facebook .fa {
+            color: #3B5998;
+        }
+
+        /* Twitter button styles */
+        .social-button.twitter:before {
+            background-color: #55ACEE;
+        }
+
+        .social-button.twitter .fa {
+            color: #55ACEE;
+        }
+
+        /* Google button styles */
+        .social-button.google:before {
+            background-color: #DD4B39;
+        }
+
+        .social-button.google .fa {
+            color: #DD4B39;
+        }
+
+        .social-button:focus:before,
+        .social-button:hover:before {
+            top: -10%;
+            left: -10%;
+        }
+
+        .social-button:focus .fa,
+        .social-button:hover .fa {
+            color: #fff;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body>
+<div class="form">
+    <div class="form-small">
+        <div>
+            <img class="centerImg" alt="logo" src="{{gym_picture}}" width="">
+        </div>
+        <h1 class="h1-font">Welcome</h1>
+        <p class="p-font"><b>dear {{coach_name}}</b></p>
+                <p class="p-font">
+            We're delighted to have you join the coaching team at <b>{{gym_name}}</b>. Your expertise
+            and passion for {{activity_name}} coaching are a perfect fit for our gym, and we're eager to see the incredible
+            results you'll help our members achieve. Let's work together to inspire greatness in our clients!
+        </p>
+        <p class="p-font"><b>Warm regards</b>,</p>
+        <br>
+
+        <h3 class="contact-font">Stay in touch</h3>
+
+        <div class="social-buttons">
+            <a class="social-button facebook" href="https://www.facebook.com/MYGYMFIT">
+                <i class="fa fa-facebook">
+                    <img src="{% static '/images/facebook.png' %}" alt="Facebook">
+                </i>
+            </a>
+
+            <a class="social-button google" href="https://www.instagram.com/mygym_fitnessclub/?hl=fr">
+                <i class="fa fa-instagram">
+                    <img src="{% static '/images/instagram.png' %}" alt="Instagram">
+                </i>
+            </a>
+        </div>
+
+        <p class="p-footer">Copyright © 2023. All rights reserved</p>
+    </div>
+</div>
+</body>
+</html>
+
