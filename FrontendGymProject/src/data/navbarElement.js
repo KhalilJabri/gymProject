@@ -1,8 +1,8 @@
 import React from "react"
 import {RiTeamFill} from "react-icons/ri"
 import {GiMuscleUp} from "react-icons/gi"
-import {TbReportAnalytics, TbPointFilled} from "react-icons/tb"
-
+import {TbReportAnalytics, TbPointFilled ,TbCalendarCog} from "react-icons/tb"
+import {FaShop} from 'react-icons/fa6'
 
 export const superAdminElements = [
     {
@@ -55,5 +55,18 @@ export const superAdminElements = [
             },
         ],
     },
+    {
+        title:'Settings',
+        links: [
+            {
+                name: 'ManageGym',
+                icon: <FaShop/>
+            },
+            {
+                name: 'ManageActivity',
+                icon: <TbCalendarCog/>
+            },
+        ]   
+    }
 ];
 

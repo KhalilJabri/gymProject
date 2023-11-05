@@ -1,13 +1,28 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import {Link, NavLink} from 'react-router-dom'
 import { useStateContext } from '../contexts/ContextProvider'
 import {superAdminElements} from '../data/navbarElement'
+import {link} from '../Connection/link'
 import logoGym from '../data/logoGym.png'
 import {MdOutlineCancel} from 'react-icons/md'
-
+import {TbPointFilled} from 'react-icons/tb'
 
 const Sidebar = () => {
   const {activeMenu, setActiveMenu, screenSize, isClicked, setIsClicked, handleClick, initialState} = useStateContext();
+  const [listAct,setlistAct] = useState([]);
+
+  const fetchActivity = async() =>{
+    const response = await fetch(`${link}/account/activity/`,{
+      method: 'GET',
+      headers: {
+       'Content-Type': 'application/json',
+      },})
+      const resData = await response.json();
+      setlistAct(resData["data"]);                   
+  }
+    useEffect(()=>{
+      fetchActivity();
+    },[])
 
   const handleCloseSideBar = () => {
     if (activeMenu !== undefined && screenSize <= 900) {
@@ -48,18 +63,26 @@ const Sidebar = () => {
                   {
                     item.links.map((link,index) => (
                       <div key={index}>
-                        <NavLink to={`/${link.name}`} key={link.name} onClick={()=>{handleCloseSideBar();handleClick(link.name);}} className={({isActive}) => isActive ? activeLink : normalLink} >
+                        {link.name ==="Subscribers"?
+                        <NavLink to={`/${link.name}/all`} key={link.name} onClick={()=>{handleCloseSideBar();handleClick(link.name)}} className={({isActive}) => isActive ? activeLink : normalLink} >
+                          {link.icon}
+                          <span className='capitalize'>
+                            {link.name}
+                          </span>
+                        </NavLink> :
+                        <NavLink to={`/${link.name}`} key={link.name} onClick={()=>{handleCloseSideBar();handleClick(link.name)}} className={({isActive}) => isActive ? activeLink : normalLink} >
                           {link.icon}
                           <span className='capitalize'>
                             {link.name}
                           </span>
                         </NavLink>
+                        } 
                         {
                           (link.name==="Subscribers" && isClicked.Subscribers===true) ? 
                             <div className=' rounded-lg text-md ml-8 mr-7'>
-                              {(link.list.map((list) =>(
-                                <NavLink to={`/${link.name}/${list.name}`} key={list.name} onClick={handleCloseSideBar} className={({isActive}) => isActive ? activeList : normalList} >
-                                  {list.icon}
+                              {(listAct.map((list,index) =>(
+                                <NavLink to={`/${link.name}/${list.name}`} key={index} onClick={()=>{handleCloseSideBar();}} className={({isActive}) => isActive ? activeList : normalList} >
+                                  <TbPointFilled/>
                                   <span className=' capitalize'>
                                     {list.name}
                                   </span>

@@ -1,21 +1,21 @@
 import React from 'react'
 import { useStateContext } from '../contexts/ContextProvider'
-import {CoachesTable} from '../data/data'
+
 import {MdOutlinePhoneIphone,MdEmail } from 'react-icons/md'
 import {LiaUserEditSolid} from 'react-icons/lia'
 
-const CoachDetails = () => {
+const CoachDetails = ({x}) => {
+    
     const {showCoachDetails, setShowCoachDetails, handleClickCoachDetails} = useStateContext();
     const elementFooterCrad ='flex flex-row flex-nowrap text-white m-1 mr-3';
     const iconFooterCard = 'w-4 h-4 mr-2 ';
-    const filteredData = CoachesTable.filter((row) => row.id === showCoachDetails);
+
   return (
     <div>
       <div className='text-center m-5 mb-10 text-2xl font-bold'>
         <h1>Coach Profile</h1>
       </div>
       {
-        filteredData.map((item) => (
           <>
             <div className='shadow-xs bg-light-gray rounded-2xl md:mx-12 mx-8'>
               <div>
@@ -23,13 +23,13 @@ const CoachDetails = () => {
               </div>  
               <br/>
               <div className='mb-3'>
-                <img className='rounded-full border-4 border-eBony w-36 mx-auto' src={item.image} alt='profile img' />
+                <img className='rounded-full border-4 border-eBony w-32 h-32 mx-auto' src={x.person.picture} alt='profile img' />
               </div>
               <div>
-                <h3 className='text-center text-2xl font-bold'>{item.name}</h3>
+                <h3 className='text-center text-2xl font-bold'>{x.person.name}</h3>
                 <div className='flex flex-row flex-nowrap justify-center text-xs m-1 mb-3'>
-                  <p className='text-gray-500 border-r-1 border-gray-500 px-1'>{item.gender}</p>
-                  <span className=' text-gray-600 flex flex-row flex-nowrap px-1'>Born :<p className='pl-1'>{item.birthday}</p></span>
+                  <p className='text-gray-500 border-r-1 border-gray-500 px-1'>{x.person.gender}</p>
+                  <span className=' text-gray-600 flex flex-row flex-nowrap px-1'>Born :<p className='pl-1'>{x.person.birthdate}</p></span>
                 </div>
               </div>
               <hr/> 
@@ -37,31 +37,31 @@ const CoachDetails = () => {
                 <tbody className=''>
                   <tr className='h-8'>
                     <td className=' font-semibold whitespace-nowrap'>CIN :</td>
-                    <td className='pl-8'>{item.cin}</td>
+                    <td className='pl-8'>{x.person.cin}</td>
                   </tr>
                   <tr className='h-8'>
                     <td className=' font-semibold whitespace-nowrap'>Address :</td>                      
-                    <td className='pl-8'>{item.address}</td>
+                    <td className='pl-8'>{x.person.address}</td>
                   </tr>
                   <tr className='h-8'>
                     <td className=' font-semibold whitespace-nowrap'>Activity :</td>
-                    <td className='pl-8'>{item.activity}</td>
+                    <td className='pl-8'>{x.activity.name}</td>
                   </tr>
                   <tr className='h-8'>
-                    <td className=' font-semibold whitespace-nowrap'>Created :</td>
-                    <td className='pl-8'>{item.created}</td>
+                    <td className=' font-semibold whitespace-nowrap'>Hired :</td>
+                    <td className='pl-8'>{x.hireDate}</td>
                   </tr>
                 </tbody>
               </table>  
               <div className=' bg-eBony rounded-b-2xl p-2'>
                 <ul className='text-xs flex flex-row justify-around flex-wrap'>
-                  <li className={elementFooterCrad}><MdOutlinePhoneIphone className={iconFooterCard}/> <p>{item.phoneNumber}</p></li>
-                  <li className={elementFooterCrad}><MdEmail className={iconFooterCard}/> <p>{item.email}</p></li>
+                  <li className={elementFooterCrad}><MdOutlinePhoneIphone className={iconFooterCard}/> <p>{x.person.number}</p></li>
+                  <li className={elementFooterCrad}><MdEmail className={iconFooterCard}/> <p>{x.person.email}</p></li>
                 </ul>
               </div>   
             </div>
           </>
-      ))}
+      }
     </div>
   )
 }
