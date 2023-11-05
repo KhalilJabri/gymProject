@@ -1,5 +1,5 @@
 # Ignore the virtual environment directory
-venv/
+menv/
 
 # Ignore database files (SQLite)
 db.sqlite3

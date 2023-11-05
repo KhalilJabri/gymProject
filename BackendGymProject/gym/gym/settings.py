@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    "corsheaders",
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
@@ -49,13 +50,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'gym.urls'
@@ -166,11 +166,29 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Replace with your React.js app's URL
-    "https://your-production-app.com",  # Add any other production domains
 ]
+
+# CORS_ALLOW_METHODS = (
+#     "DELETE",
+#     "GET",
+#     "OPTIONS",
+#     "PATCH",
+#     "POST",
+#     "PUT",
+# )
+
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
 
 # Allow credentials (cookies, authentication headers) to be sent cross-origin
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # SIMPLE_JWT = {

@@ -5,7 +5,7 @@ from .views import (UserLoginView, LogoutView, UserRegisterView, UserResetPasswo
                     AddGetCoachView, SpecificCoachView, ActivityView, SpecificActivityView, GetUsersView,
                     ChangePermissionUserView, DashboardMoneyByMonthByYearView, DashboardMoneyByActivityByYearView,
                     SubscriptionView, SpecificSubscriptionView, NotificationView, GetSpecificUserView,
-                    DashboardView, DeleteSpecificUser, GymView, SpecificGymView)
+                    DashboardView, DeleteSpecificUser, GymView, SpecificGymView, )
 
 urlpatterns = [
     path('login/', UserLoginView.as_view(), name='user_login'),
@@ -25,7 +25,7 @@ urlpatterns = [
 
     path('member/', AddGetMemberView.as_view(), name='add_get_member'),
     path('member/<int:pk>/', SpecificMemberView.as_view(), name='get_update_delete_specific_member'),
-    # path('activeMember/<int:pk>/', ActiveMemberView.as_view(), name="change_member_status"),
+    # path('deleteMember/<int:pk>/', DeleteMemberView.as_view(), name="change_member_status"),
 
     path('coach/', AddGetCoachView.as_view(), name='add_get_coach'),
     path('coach/<int:pk>/', SpecificCoachView.as_view(), name='get_update_dalete_specific_coach'),
