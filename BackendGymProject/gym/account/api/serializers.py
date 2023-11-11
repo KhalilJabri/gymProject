@@ -183,17 +183,6 @@ class FirstSubscriptionSerializer(serializers.ModelSerializer):
         else:
             return False
 
-class AddGetMemberSerializer(serializers.ModelSerializer):
-    person = FirstPersonMemberDetailsSerializer()
-    # member_sub = FirstSubscriptionSerializer(many=True)
-    class Meta:
-        model = Member
-        fields = ['id', 'person', 'member_sub']
-        extra_kwargs = {
-            'id': {'read_only': True},
-            # 'person': {'read_only': True},
-        }
-
 class UpdateMemberPersonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Person
@@ -202,6 +191,16 @@ class UpdateMemberPersonSerializer(serializers.ModelSerializer):
             'picture': {'read_only': True},
             'created_at': {'read_only': True}
         }
+
+class AddGetMemberSerializer(serializers.ModelSerializer):
+    # person = UpdateMemberPersonSerializer()
+    # member_sub = FirstSubscriptionSerializer(many=True)
+    # person = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all())
+
+    class Meta:
+        model = Member
+    #     fields =['person']
+        exclude = ('id',)
 
 class SubscriptionDetailsSerializer(serializers.ModelSerializer):
     endDate = serializers.SerializerMethodField()
@@ -239,14 +238,14 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'read_only': True},
             'startDate': {'required': False, 'default': timezone.now().date()},
-            'activity': {'required': True}
+            # 'activity': {'required': True}
         }
 
 class AddMemberSubscriptionSerializer(serializers.ModelSerializer):
     # startDate = serializers.DateField(required=False, default=timezone.now().date())
     class Meta:
         model = Subscription
-        fields = ['id', 'price', 'startDate', 'numberOfSub', 'typeOfNumberSub', 'activity']
+        fields = ['id', 'price', 'startDate', 'numberOfSub', 'typeOfNumberSub', 'activity', 'member']
         extra_kwargs = {
             'id': {'read_only': True},
             'startDate': {'required': False, 'default': timezone.now().date()}

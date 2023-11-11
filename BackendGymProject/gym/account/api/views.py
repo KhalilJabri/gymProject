@@ -14,7 +14,8 @@ from django.db.models.functions import Cast
 from django.db.models import IntegerField
 from datetime import datetime
 from django.urls import reverse
-from urllib.parse import urlencode, unquote
+from urllib.parse import urlencode
+import time
 # from urllib.parse import unquote
 
 from .pagination import SubscribersPagnation
@@ -277,7 +278,6 @@ class AddGetMemberView(APIView):
 
     def get(self, request, format=None, *args, **kwargs):
         activity_name = request.GET.get('activity_name', '')
-        # activity_name = unquote(request.GET.get('activity_name', ''))
         search = request.GET.get('search', '')
         startDate = request.GET.get('startDate', '')
         endDate = request.GET.get('endDate', '')
@@ -294,18 +294,18 @@ class AddGetMemberView(APIView):
         if search:
             sub = sub.filter(member__person__name__icontains=search)
         #
-        # if startDate == '':
-        #     sub = sub.all()
-        # elif startDate:
-        #     sub = sub.filter(startDate=startDate)
-        #
-        # if endDate:
-        #     aux = []
-        #     for item in sub:
-        #         date_str = item.end_date.strftime("%Y-%m-%d")
-        #         if date_str == endDate:
-        #             aux.append(item)
-        #     sub = aux
+        if startDate == '':
+            sub = sub.all()
+        elif startDate:
+            sub = sub.filter(startDate=startDate)
+
+        if endDate:
+            aux = []
+            for item in sub:
+                date_str = item.end_date.strftime("%Y-%m-%d")
+                if date_str == endDate:
+                    aux.append(item)
+            sub = aux
 
         # if statusFilter == 'true':
         #     aux = []
@@ -334,6 +334,7 @@ class AddGetMemberView(APIView):
                 members_with_activity = {
                     'id': subData['id'],
                     'endDate': subData['endDate'],
+                    'startDate': subData['startDate'],
                     'status': subData['status'],
                     'activity': subData['activity']
                 }
@@ -347,6 +348,7 @@ class AddGetMemberView(APIView):
                 members_with_activity = {
                     'id': subData['id'],
                     'endDate': subData['endDate'],
+                    'startDate': subData['startDate'],
                     'status': subData['status'],
                     'activity': subData['activity']
                 }
@@ -377,38 +379,40 @@ class AddGetMemberView(APIView):
         #     subValue = sub
             # sub = sub.filter(member__person__name__icontains=search)
 
-        if startDate == '':
-            subValue = subValue
-        elif startDate:
-            aux = []
-            for item in subValue:
-                ok = False
-                for itemSub in item['subscription']:
-                    if itemSub['startDate'] == startDate:
-                        # aux.append(item)
-                        if ok:
-                            aux[len(aux)-1]['subscription'].append(itemSub)
-                        else:
-                            aux.append(item)
-                            aux[len(aux)-1]['subscription'] = [itemSub]
-            subValue = aux
+        # if startDate == '':
+        #     subValue = subValue
+        # if startDate:
+        #     aux = []
+        #     for item in subValue:
+        #         ok = False
+        #         for itemSub in item['subscription']:
+        #             if itemSub['startDate'] == startDate:
+        #                 # aux.append(item)
+        #                 if ok:
+        #                     aux[len(aux)-1]['subscription'].append(itemSub)
+        #                 else:
+        #                     ok = True
+        #                     aux.append(item)
+        #                     aux[len(aux)-1]['subscription'] = [itemSub]
+        #     subValue = aux
             # sub = sub.filter(startDate=startDate)
 
-        if endDate:
-            aux = []
-            for item in subValue:
-                ok = False
-                for itemSub in item['subscription']:
-                    date_obj = datetime.strptime(itemSub['endDate'], "%d-%m-%Y")
-                    date_str = date_obj.strftime("%Y-%m-%d")
-                    if date_str == endDate:
-                        # aux.append(item)
-                        if ok:
-                            aux[len(aux)-1]['subscription'].append(itemSub)
-                        else:
-                            aux.append(item)
-                            aux[len(aux)-1]['subscription'] = [itemSub]
-            subValue = aux
+        # if endDate:
+        #     aux = []
+        #     for item in subValue:
+        #         ok = False
+        #         for itemSub in item['subscription']:
+        #             date_obj = datetime.strptime(itemSub['endDate'], "%d-%m-%Y")
+        #             date_str = date_obj.strftime("%Y-%m-%d")
+        #             if date_str == endDate:
+        #                 # aux.append(item)
+        #                 if ok:
+        #                     aux[len(aux)-1]['subscription'].append(itemSub)
+        #                 else:
+        #                     ok = True
+        #                     aux.append(item)
+        #                     aux[len(aux)-1]['subscription'] = [itemSub]
+        #     subValue = aux
 
         if statusFilter == 'true':
             aux = []
@@ -421,6 +425,7 @@ class AddGetMemberView(APIView):
                         if ok:
                             aux[len(aux)-1]['subscription'].append(itemSub)
                         else:
+                            ok = True
                             aux.append(item)
                             aux[len(aux)-1]['subscription'] = [itemSub]
             subValue = aux
@@ -436,6 +441,7 @@ class AddGetMemberView(APIView):
                         if ok:
                             aux[len(aux)-1]['subscription'].append(itemSub)
                         else:
+                            ok = True
                             aux.append(item)
                             aux[len(aux)-1]['subscription'] = [itemSub]
             subValue = aux
@@ -444,7 +450,7 @@ class AddGetMemberView(APIView):
 
         # Get the requested page number and set the page size to 2
         page_number = int(request.query_params.get('page', 1))
-        page_size = int(request.query_params.get('page_size', 5))
+        page_size = int(request.query_params.get('page_size', 2))
 
         # Calculate the start and end indices for pagination
         start_index = (page_number - 1) * page_size
@@ -465,11 +471,16 @@ class AddGetMemberView(APIView):
         base_url = reverse('add_get_member')  # Replace with the actual name of your API view
         next_page_url = None
         previous_page_url = None
-        # print(request.get_full_path())
+
+        # request.build_absolute_uri()       # http://localhost:8000/admin/store/product/
+        # print(request.get_full_path())     # /some/content/1/
+        # print(request.query_params.copy()) # ?page=2
+        # print(request.scheme)              # http or https
+        # print(request.META['HTTP_HOST'])   # example.com
+        # print(request.path)                # /some/content/1/
 
         if next_page:
             next_page_query_params = request.query_params.copy()
-            # print(next_page_query_params)
             next_page_query_params['page'] = next_page
             next_page_query_params['page_size'] = page_size
             next_page_url = f"{base_url}?{urlencode(next_page_query_params)}"
@@ -484,39 +495,42 @@ class AddGetMemberView(APIView):
             'next': next_page_url,
             'previous': previous_page_url,
             'count': total_items,
+            'pageSize': page_size,
             'results': paginated_data,
         }
-        # return Response(response_data, status=status.HTTP_200_OK)
 
         return Response({'message': 'data of members', 'data': response_data}, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
         serializer = AddMemberSerializer(data=request.data)
+        activity = Activity.objects.all()
+        if len(activity) == 0:
+            return Response({'message': 'there is no activity, you should add some!!'}, status=status.HTTP_404_NOT_FOUND)
         if serializer.is_valid():
             serializer_person = MngPersonMemberSerializer(data=serializer.data['person'])
             if serializer_person.is_valid():
-                # if(not Person.objects.get(email=serializer_person.data['email']).exists):
-
-                person_instance = serializer_person.save()
-                # member_data = request.data.get('member_profile', {})
-                member_data = {}
-                member_data['person'] = person_instance.id
-                member_serializer = AddGetMemberSerializer(data=member_data)
-                if member_serializer.is_valid():
-                    member_instance = member_serializer.save()
-                    subscription_instance = serializer.data['subscription']
-                    subscription_instance['member'] = member_instance.id
-                    # print(subscription_instance['member'])
-                    serializer_subscription = SubscriptionSerializer(data=subscription_instance)
-                    if serializer_subscription.is_valid():
-                        print(serializer_subscription['activity'])
-                        try:
-                            activity = Activity.objects.get(id=serializer_subscription['activity'])
+                existPerson = Person.objects.get(name=serializer_person.validated_data['name'],
+                                                 email=serializer_person.validated_data['email'],
+                                                 gender=serializer_person.validated_data['gender'])
+                # check if the person exist in the dataBase or not
+                if existPerson is None:
+                    person_instance = serializer_person.save()
+                    member_data = {}
+                    member_data['person'] = person_instance.id
+                    member_serializer = AddGetMemberSerializer(data=member_data)
+                    if member_serializer.is_valid():
+                        member_instance = member_serializer.save()
+                        subscription_instance = serializer.data['subscription']
+                        subscription_instance['member'] = member_instance.id
+                        serializer_subscription = SubscriptionSerializer(data=subscription_instance)
+                        if serializer_subscription.is_valid():
                             serializer_subscription.save()
                             gym = Gym.objects.all().first()
                             context = {
                                 'member_name': serializer.data['person']['name'],
                                 'gym_name': gym.name,
+                                'gym_fcbkLink': gym.linkFacebook,
+                                'gym_instaLink': gym.linkInstagram
                                 # 'gym_picture': gym.pictureGym.url
                             }
                             email_template = render(request, 'email_member.html', context)
@@ -525,32 +539,55 @@ class AddGetMemberView(APIView):
                             return Response({'message': 'member and his subscription saved successfully',
                                              'data': serializer_subscription.data},
                                             status=status.HTTP_201_CREATED)
-                        except Activity.DoesNotExist:
-                            return Response({'message': 'activity does not exist'}, status=status.HTTP_404_NOT_FOUND)
-                        # if serializer_subscription['activity']:
-                            # serializer_subscription.save()
-                            # gym = Gym.objects.all().first()
-                            # context = {
-                            #     'member_name': serializer.data['person']['name'],
-                            #     'gym_name': gym.name,
-                            #     # 'gym_picture': gym.pictureGym.url
-                            # }
-                            # email_template = render(request, 'email_member.html', context)
-                            # email_content = email_template.content.decode('utf-8')
-                            # send_greetings_mail_Member(serializer.data['person']['email'], email_content)
-                            # return Response({'message': 'member and his subscription saved successfully', 'data': serializer_subscription.data},
-                            #             status=status.HTTP_201_CREATED)
-                        # else:
-
+                        else:
+                            person_instance.delete()
+                            return Response({'message': 'something wrong with subscription model',
+                                             'error': serializer_subscription.errors},
+                                            status=status.HTTP_400_BAD_REQUEST)
                     else:
                         person_instance.delete()
-                        return Response({'message': 'something wrong with subscription model',
-                                         'error': serializer_subscription.errors},
+                        return Response({'message': 'something wrong with member modal', 'error': member_serializer.errors},
                                         status=status.HTTP_400_BAD_REQUEST)
+
+                # check if the member is exist but not deleted or exist and deleted
                 else:
-                    person_instance.delete()
-                    return Response({'message': 'something wrong with member modal', 'error': member_serializer.errors},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                    # existPerson
+                    existMember = Member.objects.get(person=existPerson.id)
+                    if existMember is None:
+                        member_data = {}
+                        member_data['person'] = existPerson.id
+                        member_serializer = AddGetMemberSerializer(data=member_data)
+                        if member_serializer.is_valid():
+                            member_instance = member_serializer.save()
+                            subscription_instance = serializer.data['subscription']
+                            subscription_instance['member'] = member_instance.id
+                            serializer_subscription = SubscriptionSerializer(data=subscription_instance)
+                            if serializer_subscription.is_valid():
+                                serializer_subscription.save()
+                                return Response({'message': 'A person exists but is not listed as a member, and we are adding a new subscription for them.',
+                                                 'data': serializer_subscription.data},
+                                                status=status.HTTP_201_CREATED)
+                    elif existMember is not None and existPerson.is_deleted == True:
+                        existPerson.is_deleted = False
+                        existPerson.save()
+                        subscription_instance = serializer.data['subscription']
+                        subscription_instance['member'] = existMember.id
+                        serializer_subscription = SubscriptionSerializer(data=subscription_instance)
+                        if serializer_subscription.is_valid():
+                            serializer_subscription.save()
+                            return Response({'message': 'A member who was previously removed has been reinstated, and we have provided them with a new subscription.',
+                                             'data': serializer_subscription.data},
+                                            status=status.HTTP_201_CREATED)
+                    elif existMember is not None:
+                        subscription_instance = serializer.data['subscription']
+                        subscription_instance['member'] = existMember.id
+                        serializer_subscription = SubscriptionSerializer(data=subscription_instance)
+                        if serializer_subscription.is_valid():
+                            serializer_subscription.save()
+                            return Response({'message': 'The member already exists, and we are assigning a new subscription to them.',
+                                                'data': serializer_subscription.data},
+                                            status=status.HTTP_201_CREATED)
+
             else:
                 return Response({'message': 'something wrong with person model', 'error': serializer_person.errors},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -568,6 +605,7 @@ class SpecificMemberView(APIView):
                 return Response({'messsage': 'member not found'}, status=status.HTTP_404_NOT_FOUND)
 
             serializer_member = GetSpecificMemberSerialiser(member, context={"request": request})
+            serializer_member.data['member_sub'].reverse()
             return Response({'message': 'member exist', 'data': serializer_member.data}, status=status.HTTP_200_OK)
         except:
             return Response({'message': 'something wrong'}, status=status.HTTP_400_BAD_REQUEST)
@@ -645,7 +683,10 @@ class AddGetCoachView(APIView):
                         'coach_name': instance_person.name,
                         'gym_name': gym.name,
                         'activity_name': activity_name.name,
-                        'gym_picture': gym.pictureGym.url
+                        'gym_facebook': gym.linkFacebook,
+                        'gym_insta': gym.linkInstagram,
+                        'gym_picture': gym.pictureGym.url,
+                        'link': "http://127.0.0.1:8000/static/images/facebook.png",
                     }
                     email_template = render(request, 'email_coach.html', context)
                     email_content = email_template.content.decode('utf-8')
@@ -771,23 +812,31 @@ class SpecificGymView(APIView):
 class ActivityView(APIView):
     # permission_classes = [IsAuthenticated]
     def get(self, request, format=None):
-        activities = Activity.objects.all()
+        activities = Activity.objects.filter(is_deleted=False)
         if activities.exists():
             serializer = ActivitySerializer(activities, many=True)
-            # if serializer.is_valid():
             return Response({'message': 'data activities are exist', 'data': serializer.data}, status=status.HTTP_200_OK)
-            # else:
-            #     return Response({'message': 'something wrong with activity fields', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'message': 'list of activities are empty', 'data': activities}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, format=None):
         serializer = ActivitySerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'activity saved successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            try:
+                activity = Activity.objects.get(name=serializer.validated_data['name'])
+                if activity.is_deleted:
+                    activity.is_deleted = False
+                    activity.save()
+                    return Response({'message': 'activity saved successfully', 'data': serializer.data},
+                                    status=status.HTTP_201_CREATED)
+                else:
+                    return Response({'message': 'activity already exist', 'data': serializer.data},
+                                    status=status.HTTP_202_ACCEPTED)
+            except Activity.DoesNotExist:
+                serializer.save()
+                return Response({'message': 'activity saved successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
         else:
-            return Response({'message': 'something wrong with activity fields', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'something wrong with activity fields'}, status=status.HTTP_400_BAD_REQUEST)
 
 class SpecificActivityView(APIView):
     # permission_classes = [IsAuthenticated]
@@ -797,10 +846,10 @@ class SpecificActivityView(APIView):
         except Activity.DoesNotExist:
             return Response({'message': 'activity not found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = ActivitySerializer(activity)
-        if serializer.is_valid():
-            return Response({'message': 'activity exist', 'data': serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': 'something wrong with activity fields', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        # if serializer.is_valid():
+        return Response({'message': 'activity exist', 'data': serializer.data}, status=status.HTTP_200_OK)
+        # else:
+        #     return Response({'message': 'something wrong with activity fields', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk, format=None):
         try:
@@ -818,8 +867,10 @@ class SpecificActivityView(APIView):
             activity = Activity.objects.get(id=pk)
         except Activity.DoesNotExist:
             return Response({'message': 'activity not found'}, status=status.HTTP_404_NOT_FOUND)
-        activity.delete()
-        return Response({'message': 'activity deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        activity.is_deleted = True
+        activity.save()
+        # activity.delete()
+        return Response({'message': 'Activity deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 class NotificationView(APIView):
     # permission_classes = [IsAuthenticated]

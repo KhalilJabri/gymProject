@@ -22,7 +22,7 @@ class Person(models.Model):
         ('male', 'Male'),
         ('female', 'Female'),
     ]
-    email = models.EmailField(unique=True, max_length=255, blank=True)
+    email = models.EmailField(max_length=255, blank=True)
     name = models.CharField(max_length=250)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     address = models.CharField(max_length=300, blank=True, null=True)
@@ -36,8 +36,8 @@ class Person(models.Model):
     is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.name
-        # return str(self.id)
+        return str(self.id) + ' ' + self.name
+
 class UserManager(BaseUserManager):
     def create_user(self, email, name, password=None, password2=None):
         if not email:
@@ -108,11 +108,12 @@ class Member(models.Model):
     person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='member_profile')
 
     def __str__(self):
-        return str(self.person.id) + ' ' + self.person.name
+        return str(self.id) + ' ' + self.person.name
 
 class Activity(models.Model):
-    name = models.CharField(max_length=150, unique=True)
+    name = models.CharField(max_length=150)
     description = models.CharField(max_length=300, blank=True)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -125,7 +126,6 @@ class Coach(models.Model):
     def __str__(self):
         return self.person.name
 
-
 class Subscription(models.Model):
     TYPE_CHOICES = [
         ('year', 'Year'),
@@ -136,11 +136,13 @@ class Subscription(models.Model):
     startDate = models.DateField(default=timezone.now)
     numberOfSub = models.PositiveIntegerField()
     typeOfNumberSub = models.CharField(max_length=10, choices=TYPE_CHOICES)
-    member = models.ForeignKey(Member, on_delete=models.SET_NULL, related_name='member_sub', null=True)
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='member_sub')
     activity = models.ForeignKey(Activity, on_delete=models.SET_NULL, related_name='activity_sub', null=True)
 
     def __str__(self):
         return self.member.person.name + ' ' + str(self.startDate)
+        # return str(self.startDate)
+
 
     @property
     def is_expired(self):
