@@ -1,1 +1,1 @@
-export  const link = 'https://55e2-41-228-45-150.ngrok-free.app/'
+export  const link = '	https://khaliljabri.pythonanywhere.com'

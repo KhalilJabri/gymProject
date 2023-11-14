@@ -1,13 +1,37 @@
-import React from 'react'
+import React,{useState} from 'react'
 import { useStateContext } from '../contexts/ContextProvider'
 import {MdOutlinePhoneIphone,MdEmail, MdDeleteOutline } from 'react-icons/md'
 import {LiaUserEditSolid} from 'react-icons/lia'
+import EditSub from '../EditForm/EditSub'
+import AddSubscription from '../AddForm/AddSubscription'
+import {Modal} from 'antd'
+
 
 
 const SubscriberDetails = ({subDetails}) => {
   const elementFooterCrad ='flex flex-row flex-nowrap text-white m-1 mr-3';
   const iconFooterCard = 'w-4 h-4 mr-2 ';
   const {showSubDetails, setShowSubDetails, handleClickSubDetails} = useStateContext();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); 
+  const [selectedSub, setSelectedSub] = useState(null); 
+  const [showAddSubscriptionModal, setShowAddSubscriptionModal] = useState(false);
+  const style={backgroundColor:'light-gray'};
+
+  const openEditModal = (subData) => {
+    setSelectedSub(subData);
+    setIsEditModalOpen(true);
+  };
+
+
+  const closeEditModal = () => {
+    setSelectedSub(null);
+    setIsEditModalOpen(false);
+  };
+
+  const saveEditedSub = (editedSubData) => {
+    console.log('Edited Subscriber Data:', editedSubData);
+  };
+
   return (
    
     <div>
@@ -19,7 +43,12 @@ const SubscriberDetails = ({subDetails}) => {
 
             <div className='shadow-xs bg-light-gray md:w-2/5 rounded-2xl'>
               <div>
-                <button className=' och:text-2xl och:hover:text-3xl text-xl hover:text-2xl bg-eBony border rounded-full absolute och:left-72 md:top-24 md:left-_266 md:right-auto thr:top-24 top-32 right-_10 ml-3 p-2'><LiaUserEditSolid className='text-white ml-1 mb-1'/></button>
+              <button
+                className=' och:text-2xl och:hover:text-3xl text-xl hover:text-2xl bg-eBony border rounded-full absolute och:left-72 md:top-24 md:left-_266 md:right-auto thr:top-24 top-32 right-_10 ml-3 p-2'
+                onClick={() => openEditModal(subDetails)}
+              >
+                <LiaUserEditSolid className='text-white ml-1 mb-1' />
+              </button>
               </div>  
               <div className='mt-5 mb-3'>
                 <img className='rounded-full border-4 border-eBony w-32 h-32 mx-auto' src={subDetails.person.picture} alt='profile img' />
@@ -77,9 +106,20 @@ const SubscriberDetails = ({subDetails}) => {
             </div> 
           </div> 
           <div className='text-center float-right border-1 bg-eBony rounded-lg md:mr-15% xs:mx-35% md:my-0 mt-5'>
-            <button className='px-3 py-2 text-white '>Add Subscription</button>
+          <button className='px-3 py-2 text-white 'onClick={() => setShowAddSubscriptionModal(true)}>Add Subscription</button>
           </div>
+          <Modal style={style} open ={showAddSubscriptionModal}  onCancel={() => setShowAddSubscriptionModal(false)} footer={null}>
+          <AddSubscription memberId={subDetails.id} />
+</Modal>
           </>
+          {isEditModalOpen && (
+        <EditSub
+          isOpen={isEditModalOpen}
+          closeModal={closeEditModal}
+          subData={selectedSub}
+          onSave={saveEditedSub} 
+        />
+      )}
     </div>
 
   )

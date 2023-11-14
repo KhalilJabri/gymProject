@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import {Header, Footer, Sidebar,Navbar} from './components'
-import {Home, Employees, Coaches, Subscribers,ManageActivity,ManageGym} from './pages/index.jsx'
+import {Home, Employees, Coaches, Subscribers,ManageActivity,ManageGym,Profile} from './pages/index.jsx'
 import { useStateContext } from './contexts/ContextProvider'
 import {link} from './Connection/link'
 import './App.css'
@@ -51,6 +51,7 @@ const App = () => {
                   <Route path="/employees" element={<Employees />} />
                   <Route path="/coaches" element={<Coaches />} />
                   <Route path="/subscribers/:param" element={<Subscribers />} />
+                  <Route path="/profile" element={<Profile />} />
                   {/*settings */}
                   <Route path="/ManageActivity" element={<ManageActivity />} />
                   <Route path="/ManageGym" element={<ManageGym />} />

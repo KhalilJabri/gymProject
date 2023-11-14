@@ -3,16 +3,17 @@ import {CoachDetails, Header } from '../components'
 import { useStateContext } from '../contexts/ContextProvider'
 import {Modal} from 'antd'
 import {link} from '../Connection/link'
-import {FaUserCog} from 'react-icons/fa'
+import { FaUserCog, FaUserPlus} from 'react-icons/fa'
 import {AiFillCloseCircle} from 'react-icons/ai'
 import {GoSearch} from 'react-icons/go'
+import AddCoaches from '../AddForm/AddCoche'
 
 const Coaches = () => {
 
     const rowStyle ='p-2 font-bold tracking-wide text-center border-2 text-sm';
     const style={backgroundColor:'light-gray'};
     const {showCoachDetails, setShowCoachDetails, handleClickCoachDetails,delCoach,setDelCoach,handeleClickDelCoach} = useStateContext();
-
+    const [showAddCoachModal, setShowAddCoachModal] = useState(false);
     const [listCoach,setListCoach] = useState([]);
     const [x,setX] = useState();
 
@@ -56,12 +57,18 @@ const Coaches = () => {
 
     return (
     <div className='m-2 md:m-8 mt-20 p-3 md:p-12 bg-white rounded-3xl '>
-        <Header category="Page" title="Coachs" />
+         <Header category="Page" title="Coaches" />
         <div className='flex flex-row bg-neutral-700 rounded-full p-1 sm:h-10 h-9 md:w-72 sm:w-64 w-60'> 
             <input className=' rounded-full border-1 sm:w-64 sm:pl-4 p-2' placeholder='Type name to search...' type="text" onChange={(e)=>{ handleClickSearchCoach(e.target.value);fetchSearchData(e.target.value);}} />
             <button className='text-white text-lg sm:text-2xl m-1 sm:mx-2 mr:2 ' onClick={()=>fetchSearchData(searchCoach)}><GoSearch/></button>
         </div>
         <div className='overflow-auto mt-16'>
+        <button
+  className="border border-gray-500 text-black-500 px-2 py-1 rounded-md mb-2"
+  onClick={() => setShowAddCoachModal(true)}
+>
+  <FaUserPlus/> 
+</button>
             <table className='w-full border-2'>
                 <thead className='bg-gray-50 '>
                     <tr>
@@ -95,7 +102,9 @@ const Coaches = () => {
         <Modal style={style} open = {showCoachDetails!==0} onCancel={()=> setShowCoachDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-35% mt-7 mb-1 py-2 px-4 rounded-lg' onClick={() =>handeleClickDelCoach()}>Delete Account</button>}>
             <CoachDetails x={x} /> 
         </Modal> 
-        
+        <Modal style={style} open ={showAddCoachModal}  onCancel={() => setShowAddCoachModal(false)} footer={null}>
+  <AddCoaches /> 
+</Modal>
 
         <Modal open={delCoach===true} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} onCancel={() => handeleClickDelCoach()}>
             <h3 className=' text-xl font-semibold mb-3'>Confirm Account Deletion</h3>

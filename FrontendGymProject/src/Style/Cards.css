@@ -1,0 +1,73 @@
+/* cardSub style */
+.card-sub {
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  height: 100px;
+  border: 1px solid #dcdcdc;
+  margin-top: 10px;
+  width: 500px;
+  margin-left: 10px;
+}
+.cardsubStyle{
+  display: flex;
+  justify-content: space-between;
+}
+
+
+/* statistic style */
+.statisticstyle {
+  margin-bottom: 15px;
+}
+.statistic {
+  margin-bottom: 15px;
+  margin-right: 80px;
+}
+
+/* title style */
+.title {
+  font-weight: bold;
+}
+
+/* user icon style */
+.user-icon {
+  border-radius: 50%;
+  font-size: 19px;
+  padding: 8px;
+  color: blue;
+  background-color: lightblue;
+}
+
+/* male icon style */
+.male-icon {
+  border-radius: 50%;
+  font-size: 19px;
+  padding: 8px;
+  color: green;
+  background-color: lightgreen;
+}
+
+/* female icon style */
+.female-icon {
+  border-radius: 50%;
+  font-size: 19px;
+  padding: 8px;
+  color: purple;
+  background-color: orange;
+}
+
+/* revenue icon style */
+.revenue-icon {
+  border-radius: 50%;
+  font-size: 19px;
+  padding: 8px;
+  color: gray;
+  background-color: lightgray;
+}
+.cardstyle{
+  width: 232px;
+  border: 1px solid #dcdcdc;
+  height: 98px;
+  box-shadow:  0px 4px 8px rgba(0, 0, 0, 0.2);
+  margin-top: 10px;
+}

@@ -6,10 +6,10 @@ import { useStateContext } from '../contexts/ContextProvider'
 import {Modal} from 'antd'
 import {Pagination} from 'antd'
 import {MdRadioButtonChecked,MdFilterAlt} from 'react-icons/md'
-import {FaUserCog,FaFilter} from 'react-icons/fa'
+import {FaUserCog,FaFilter,FaUserPlus} from 'react-icons/fa'
 import {AiFillCloseCircle} from 'react-icons/ai'
 import {GoSearch} from 'react-icons/go'
-
+import AddSubscribers from '../AddForm/AddSubscriber'
 
 
 const Subscribers = () => {
@@ -20,6 +20,7 @@ const Subscribers = () => {
     const iconClose = {color: 'red', fontSize: "1.5em", margin: "auto" };
     const hiddenfilter='hidden';
     const activeFilter='flex sm:flex-row flex-col bg-neutral-100 sm:mt-6 mt-3 p-1 py-2 rounded-xl';
+    const [showAddSubModal, setShowAddSubModal] = useState(false);
 
     const {showSubDetails, setShowSubDetails,handleClickSubDetails,delSub, handeleClickDelSub,showFilter,handleClickFilter,searchName,handleClickSearchName,startDate,handleClickFilterStart,endDate,handleClickFilterEnd,status,handleClickFilterStatus} = useStateContext();
 
@@ -42,40 +43,42 @@ const Subscribers = () => {
 
     useEffect(()=>{
         fetchData();
-    },[param,page])
+    },[param])
 
   const [subDetails,setSubDetails] = useState({});
     const fetchDetails = async(id) =>{
-        const response = await fetch(`${link}/account/member/${id}/?&page=${page}&page_size=${pageSize}`,{
+        const response = await fetch(`${link}/account/member/${id}/`,{
             method: 'GET',
             headers: {
             'Content-Type': 'application/json',
             },})
             const resData = await response.json();
-            setSubDetails(resData["data"].results);          
+            setSubDetails(resData["data"]);          
     }
 
     const fetchSearchData = async(search,start,end,status) =>{
-        console.log("search",search,typeof(search))
-        console.log("start",start,typeof(start))
-        console.log("end",end,typeof(end))
-        console.log("status",status,typeof(status))
+        // console.log("search",search,typeof(search))
+        // console.log("start",start,typeof(start))
+        // console.log("end",end,typeof(end))
+        // console.log("status",status,typeof(status))
         const response = await fetch(`${link}/account/member/?activity_name=${param}&search=${search}&startDate=${start}&endDate=${end}&status=${status}&page=${page}&page_size=${pageSize}`,{
             method: 'GET',
             headers: {
             'Content-Type': 'application/json',
             },})
             const resData = await response.json();
-            setListSub(resData["data"].results);              
+            setListSub(resData["data"].results); 
+            setTotal(resData["data"].count);           
     }
     useEffect(()=>{
         fetchSearchData(searchName,startDate,endDate,status);
-    },[searchName,startDate,endDate,status])
+    },[searchName,startDate,endDate,status,page])
 
 
   return (
     <div className='m-2 md:m-8 mt-20 p-3 md:p-12 bg-white rounded-3xl'>
         <Header category="Page" title="Subscribers" />
+        
         <div className='flex flex-row'>
             <div className='flex flex-col'>
                 <div>
@@ -107,6 +110,12 @@ const Subscribers = () => {
         </div>
 
         <div className='overflow-auto mt-16'>
+        <button
+   className="border border-gray-500 text-black-500 px-2 py-1 rounded-md mb-2"
+  onClick={() => setShowAddSubModal(true)}
+>
+  <FaUserPlus /> 
+</button>
             <table className='w-full border-2'>
                 <thead className='bg-gray-50 '>
                     <tr>
@@ -152,7 +161,9 @@ const Subscribers = () => {
         <Modal style={style} width={800} open = {showSubDetails!==0} onCancel={()=> setShowSubDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-m mt-7 mb-1 py-2 px-4 rounded-lg' onClick={()=> handeleClickDelSub()}>Delete Account</button>}>
             <SubscriberDetails subDetails={subDetails} />
         </Modal> 
-
+        <Modal style={style} open ={showAddSubModal}  onCancel={() => setShowAddSubModal(false)} footer={null}>
+  <AddSubscribers /> 
+</Modal>
         <Modal open={delSub===true} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} onCancel={() => handeleClickDelSub()}>
             <h3 className=' text-xl font-semibold mb-3'>Confirm Account Deletion</h3>
             <p className='m-3'>Are you sure you want to delete your account?</p>

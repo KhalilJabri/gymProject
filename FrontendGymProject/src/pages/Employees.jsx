@@ -4,9 +4,10 @@ import {Header, EmployeeDetails } from '../components'
 import { useStateContext } from '../contexts/ContextProvider'
 import {link} from '../Connection/link'
 import { Switch, Modal } from 'antd'
-import {FaUserCog} from 'react-icons/fa'
+import { FaUserCog, FaUserPlus} from 'react-icons/fa'
 import {AiFillCloseCircle} from 'react-icons/ai';
 import {GoSearch} from 'react-icons/go'
+import AddEmployees from '../AddForm/AddEmployee'
 
 const Employees = () => {
     const style={backgroundColor:'light-gray'};
@@ -16,6 +17,7 @@ const Employees = () => {
     const [empDetails,setEmpDetails] = useState({});
     const [listEmp,setListEmp] = useState([]);
     const [searchEmp,setSearchEmp]=useState("");
+    const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
     const handleClickSearchEmp=(name)=>setSearchEmp(name);
 
     const fetchData = async() =>{
@@ -67,11 +69,18 @@ const Employees = () => {
     return (
     <div className='m-2 md:m-8 mt-20 p-3 md:p-12 bg-white rounded-3xl '>
         <Header category="Page" title="Employees" />
+        
         <div className='flex flex-row bg-neutral-700 rounded-full p-1 sm:h-10 h-9 md:w-72 sm:w-64 w-60'> 
             <input className=' rounded-full border-1 sm:w-64 sm:pl-4 p-2' placeholder='Type name to search...' type="text" onChange={(e)=>{ handleClickSearchEmp(e.target.value);fetchSearchData(e.target.value);}} />
             <button className='text-white text-lg sm:text-2xl m-1 sm:mx-2 mr:2 ' onClick={()=>fetchSearchData(searchEmp)}><GoSearch/></button>
         </div>
         <div className='overflow-auto mt-16'>
+        <button
+   className="border border-gray-500 text-black-500 px-2 py-1 rounded-md mb-2"
+  onClick={() => setShowAddEmployeeModal(true)}
+>
+  <FaUserPlus /> 
+</button>
             <table className='w-full border-2'>
                 <thead className='bg-gray-50 '>
                     <tr>
@@ -111,6 +120,9 @@ const Employees = () => {
         <Modal style={style} open = {showEmployeeDetails!==0} onCancel={()=> setShowEmployeeDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-35% mt-7 mb-1 py-2 px-4 rounded-lg' onClick={()=> handeleClickDelEmp()}>Delete Account</button>}>
             <EmployeeDetails empDetails={empDetails} />
         </Modal>
+        <Modal style={style} open ={showAddEmployeeModal}  onCancel={() => setShowAddEmployeeModal(false)} footer={null}>
+  <AddEmployees /> 
+</Modal>
 
         <Modal open={delEmp===true} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} onCancel={()=> handeleClickDelEmp()}>
             <h3 className=' text-xl font-semibold mb-3'>Confirm Account Deletion</h3>
