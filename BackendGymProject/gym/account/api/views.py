@@ -509,11 +509,11 @@ class AddGetMemberView(APIView):
         if serializer.is_valid():
             serializer_person = MngPersonMemberSerializer(data=serializer.data['person'])
             if serializer_person.is_valid():
-                existPerson = Person.objects.get(name=serializer_person.validated_data['name'],
+                existPerson = Person.objects.filter(name=serializer_person.validated_data['name'],
                                                  email=serializer_person.validated_data['email'],
                                                  gender=serializer_person.validated_data['gender'])
                 # check if the person exist in the dataBase or not
-                if existPerson is None:
+                if len(existPerson) == 0:
                     person_instance = serializer_person.save()
                     member_data = {}
                     member_data['person'] = person_instance.id
@@ -551,7 +551,9 @@ class AddGetMemberView(APIView):
 
                 # check if the member is exist but not deleted or exist and deleted
                 else:
-                    # existPerson
+                    existPerson = Person.objects.filter(name=serializer_person.validated_data['name'],
+                                                        email=serializer_person.validated_data['email'],
+                                                        gender=serializer_person.validated_data['gender'])
                     existMember = Member.objects.get(person=existPerson.id)
                     if existMember is None:
                         member_data = {}
@@ -685,8 +687,7 @@ class AddGetCoachView(APIView):
                         'activity_name': activity_name.name,
                         'gym_facebook': gym.linkFacebook,
                         'gym_insta': gym.linkInstagram,
-                        'gym_picture': gym.pictureGym.url,
-                        'link': "http://127.0.0.1:8000/static/images/facebook.png",
+                        'gym_picture': gym.pictureGym.url
                     }
                     email_template = render(request, 'email_coach.html', context)
                     email_content = email_template.content.decode('utf-8')

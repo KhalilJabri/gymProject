@@ -1,6 +1,6 @@
-<!--{% load static %}-->
-<!DOCTYPE html>
-<html lang="en">
+{% load static %}
+<!--<!DOCTYPE html>-->
+<html >
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,7 +9,7 @@
 <!--    {% load bootstrap5 %}-->
 <!--    {% bootstrap_css %}-->
 <!--    {% bootstrap_javascript %}-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
     <link rel="stylesheet" type="text/css" href="{% static 'css/coachCss.css' %}">
 </head>
 <style>
@@ -51,6 +51,7 @@ body {
 .contact-font {
     text-align: center;
     color: #333; /* Set your desired text color */
+
 }
 
 .social-buttons {
@@ -111,7 +112,6 @@ body {
 <!--            <a class="social-button facebook" href= {{gym_facebook}}>-->
 <!--                <i class="fa fa-facebook">-->
                     <img src="{% static 'images/facebook.png' %}" alt="Facebook" width="100" height="100">
-                    <img src={{link}} alt="Facebook" width="100" height="100">
 
 <!--                </i>-->
 <!--            </a>-->
@@ -128,4 +128,3 @@ body {
 </div>
 </body>
 </html>
-

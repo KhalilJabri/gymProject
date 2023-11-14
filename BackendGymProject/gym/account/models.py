@@ -137,10 +137,10 @@ class Subscription(models.Model):
     numberOfSub = models.PositiveIntegerField()
     typeOfNumberSub = models.CharField(max_length=10, choices=TYPE_CHOICES)
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='member_sub')
-    activity = models.ForeignKey(Activity, on_delete=models.SET_NULL, related_name='activity_sub', null=True)
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='activity_sub')
 
     def __str__(self):
-        return self.member.person.name + ' ' + str(self.startDate)
+        return self.member.person.name + ' ' + str(self.startDate) + ' ' + self.activity.name
         # return str(self.startDate)
 
 

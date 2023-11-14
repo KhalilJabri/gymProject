@@ -245,7 +245,7 @@ class AddMemberSubscriptionSerializer(serializers.ModelSerializer):
     # startDate = serializers.DateField(required=False, default=timezone.now().date())
     class Meta:
         model = Subscription
-        fields = ['id', 'price', 'startDate', 'numberOfSub', 'typeOfNumberSub', 'activity', 'member']
+        fields = ['id', 'price', 'startDate', 'numberOfSub', 'typeOfNumberSub', 'activity']
         extra_kwargs = {
             'id': {'read_only': True},
             'startDate': {'required': False, 'default': timezone.now().date()}
