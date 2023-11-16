@@ -1,60 +1,60 @@
 .titleStyle {
-    margin-left: 20px;
-    margin-bottom: 5px;
-    font-size: 24px;
-    color: gray;
-  }
-  
-  .cardContainerStyle {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  
-  .AreaChartCardStyle {
-    flex: 1 1 calc(56% - 25px);
-    height: 420px;
-    border: 1px solid #dcdcdc;
-    margin: 10px;
-    margin-top: 30px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  .pieChartCardStyle {
-    flex: 1 1 calc(40% - 25px);
-    height: 350px;
-    border: 1px solid #dcdcdc;
-    margin: 10px;
-    margin-top: 30px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  .columnChartCardStyle {
-    flex: 1 1 calc(30% - 25px);
-    height: 420px;
-    border: 1px solid #dcdcdc;
-    margin: 10px;
-    margin-top: 30px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  .tableCardStyle {
-    flex: 1 1 calc(30% - 25px);
-    height: 400px;
-    border: 1px solid #dcdcdc;
-    margin: 10px;
-    margin-top: 30px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  .chartsContainerStyle {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .MonthAreaStyle {
-    flex: 1 1 calc(56% - 25px);
-    height: 400px;
-    border: 1px solid #dcdcdc;
-    margin: 10px;
-    margin-top: 30px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  } 
+  margin-left: 20px;
+  margin-bottom: 5px;
+  font-size: 24px;
+  color: gray;
+}
+
+.cardContainerStyle {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.AreaChartCardStyle {
+  flex: 1 1 calc(50% - 25px);
+  height: 420px;
+  border: 1px solid #dcdcdc;
+  margin: 10px;
+  margin-top: 30px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pieChartCardStyle {
+  flex: 1 1 calc(40% - 25px);
+  height: 350px;
+  border: 1px solid #dcdcdc;
+  margin: 10px;
+  margin-top: 30px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.columnChartCardStyle {
+  flex: 1 1 calc(30% - 25px);
+  height: 420px;
+  border: 1px solid #dcdcdc;
+  margin: 10px;
+  margin-top: 30px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tableCardStyle {
+  flex: 1 1 calc(30% - 25px);
+  height: 400px;
+  border: 1px solid #dcdcdc;
+  margin: 10px;
+  margin-top: 30px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chartsContainerStyle {
+  display: flex;
+  flex-wrap: wrap;
+}
+.MonthAreaStyle {
+  flex: 1 1 calc(50% - 25px);
+  height: 400px;
+  border: 1px solid #dcdcdc;
+  margin: 10px;
+  margin-top: 30px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+} 
