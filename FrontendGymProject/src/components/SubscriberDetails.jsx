@@ -87,8 +87,8 @@ const SubscriberDetails = ({subDetails}) => {
 
             <div className='shadow-xs bg-light-gray md:w-1/2 md:h-_360 h-72 overflow-x-hidden rounded-2xl md:mt-0 mt-12'>
               <h3 className='text-center text-xl font-semibold underline mt-6 mb-8'>Subscriptions</h3>
-              {subDetails.member_sub.map((sub)=>(
-                <div className='rounded-l-2xl flex flex-row justify-between border-b border-r bg-white h-16 xs:m-4 m-2'>
+              {subDetails.member_sub.map((sub,index)=>(
+                <div key={index} className='rounded-l-2xl flex flex-row justify-between border-b border-r bg-white h-16 xs:m-4 m-2'>
                   <div className=' rounded-l-2xl bg-mimosa h-16 mr-1'>
                     <h3 className=' font-semibold text-center text-white xs:text-lg text-md xs:p-4 py-5 p-2'>{sub.price}<span className='whitespace-nowrap pl-1'>DT</span></h3>
                   </div>

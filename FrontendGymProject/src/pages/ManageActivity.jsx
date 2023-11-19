@@ -47,7 +47,7 @@ const addAct = async() =>{
             </div>
             <div>
               <h4 className={styleTxt}>Description</h4>
-              <textarea maxlength="300" className={inputStyle} type='text'value={descAct} onChange={(e)=>setDescAct(e.target.value)} />
+              <textarea maxLength="300" className={inputStyle} type='text'value={descAct} onChange={(e)=>setDescAct(e.target.value)} />
             </div>
             <div>
               <button className='bg-blue-400 text-white hover:text-black hover:bg-white text-lg font-semibold border-1 rounded-lg p-2 px-6 lg:m-5 lg:ml-28 my-5' onClick={()=>addAct()} type='submit' >Save</button>
@@ -56,11 +56,11 @@ const addAct = async() =>{
           <div className='lg:border-l-2 lg:border-black lg:pl-24 pl-2 pr-2'>
             <div className='flex flex-row justify-center lg:mt-0 mt-10'><h1 className='lg:text-2xl text-xl underline font-bold my-3'>List of current activities</h1></div>
             <ul>
-              {listAct.map((item)=>(
-                <>
+              {listAct.map((item,index)=>(
+                <div key={index}>
                   <li className={listStyle}>{item.name}</li>
                   <span className={descStyle}>{item.description}</span>
-                </>
+                </div>
               ))}
             </ul>
           </div>

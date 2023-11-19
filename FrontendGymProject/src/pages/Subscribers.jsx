@@ -79,10 +79,10 @@ const Subscribers = () => {
     <div className='m-2 md:m-8 mt-20 p-3 md:p-12 bg-white rounded-3xl'>
         <Header category="Page" title="Subscribers" />
         
-        <div className='flex flex-row'>
+        <div className='flex flex-row justify-between'>
             <div className='flex flex-col'>
                 <div>
-                    <button className='rounded-2xl p-3 mr-40 bg-neutral-700 hover:bg-neutral-300' onClick={()=>handleClickFilter()}><FaFilter className='sm:text-base text-xs text-white'/></button>
+                    <button className='rounded-2xl p-3 sm:mr-0 mr-44 bg-neutral-700 hover:bg-neutral-300' onClick={()=>handleClickFilter()}><FaFilter className='sm:text-base text-xs text-white'/></button>
                 </div>
                 <div className={showFilter ? activeFilter : hiddenfilter}>
                     <div className='mx-4'>
@@ -103,19 +103,18 @@ const Subscribers = () => {
                     </div>
                 </div>
             </div>
-            <div className='flex flex-row bg-neutral-700 rounded-full p-1 sm:h-10 h-9 sm:ml-0 -ml-36'> 
+            <div className='flex flex-row bg-neutral-700 rounded-full p-1 sm:h-10 h-9 sm:ml-0 -ml-40'> 
                 <input className=' rounded-full border-1 sm:w-64 sm:pl-4 p-2' placeholder='Type name to search...' type="text" onChange={async(e)=>{ await handleClickSearchName(e.target.value);}} />
                 <button className='text-white text-lg sm:text-2xl m-1 sm:mx-2 mr:2 ' onClick={()=>fetchSearchData(searchName)}><GoSearch/></button>
+            </div>
+            <div>
+                <button className="rounded-2xl p-3 mx-2 bg-neutral-700 hover:bg-neutral-300" onClick={() => setShowAddSubModal(true)}>
+                    <FaUserPlus className='sm:text-base text-xs text-white' /> 
+                </button>
             </div>
         </div>
 
         <div className='overflow-auto mt-16'>
-        <button
-   className="border border-gray-500 text-black-500 px-2 py-1 rounded-md mb-2"
-  onClick={() => setShowAddSubModal(true)}
->
-  <FaUserPlus /> 
-</button>
             <table className='w-full border-2'>
                 <thead className='bg-gray-50 '>
                     <tr>
@@ -161,9 +160,10 @@ const Subscribers = () => {
         <Modal style={style} width={800} open = {showSubDetails!==0} onCancel={()=> setShowSubDetails(0)} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} footer={<button className='text-center text-white bg-red-700 mx-m mt-7 mb-1 py-2 px-4 rounded-lg' onClick={()=> handeleClickDelSub()}>Delete Account</button>}>
             <SubscriberDetails subDetails={subDetails} />
         </Modal> 
+
         <Modal style={style} open ={showAddSubModal}  onCancel={() => setShowAddSubModal(false)} footer={null}>
-  <AddSubscribers /> 
-</Modal>
+            <AddSubscribers /> 
+        </Modal>
         <Modal open={delSub===true} closeIcon={<AiFillCloseCircle className=" text-red-500 text-2xl" />} onCancel={() => handeleClickDelSub()}>
             <h3 className=' text-xl font-semibold mb-3'>Confirm Account Deletion</h3>
             <p className='m-3'>Are you sure you want to delete your account?</p>

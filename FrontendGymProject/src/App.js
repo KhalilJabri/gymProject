@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Header, Footer, Sidebar, Navbar } from './components';
-import {Home, Employees, Coaches, Subscribers,ManageActivity,ManageGym,Profile,Login, ForgotPass, NewPass, EnterCode} from './pages/index.jsx'
+import {DataVisualization, Employees, Coaches, Subscribers,ManageActivity,ManageGym,Profile,Login, ForgotPass, NewPass, EnterCode} from './pages/index.jsx'
 import { useStateContext } from './contexts/ContextProvider';
 import { link } from './Connection/link';
 import './App.css';
@@ -82,7 +82,7 @@ const App = () => {
               <MainContent>
                 <Routes>
                   {/* Dashboards */}
-                  <Route path="/home" element={<Home />} />
+                  <Route path="/DataVisualization" element={<DataVisualization />} />
 
                   {/* Pages */}
                   <Route path="/employees" element={<Employees />} />

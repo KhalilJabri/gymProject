@@ -69,18 +69,18 @@ const Employees = () => {
     return (
     <div className='m-2 md:m-8 mt-20 p-3 md:p-12 bg-white rounded-3xl '>
         <Header category="Page" title="Employees" />
-        
-        <div className='flex flex-row bg-neutral-700 rounded-full p-1 sm:h-10 h-9 md:w-72 sm:w-64 w-60'> 
-            <input className=' rounded-full border-1 sm:w-64 sm:pl-4 p-2' placeholder='Type name to search...' type="text" onChange={(e)=>{ handleClickSearchEmp(e.target.value);fetchSearchData(e.target.value);}} />
-            <button className='text-white text-lg sm:text-2xl m-1 sm:mx-2 mr:2 ' onClick={()=>fetchSearchData(searchEmp)}><GoSearch/></button>
+        <div className='flex flex-row sm:justify-end justify-between'>
+            <div className='flex flex-row bg-neutral-700 rounded-full p-1 sm:h-10 h-9 md:w-72 sm:w-64 w-60 sm:mr-35%'> 
+                <input className=' rounded-full border-1 sm:w-64 sm:pl-4 p-2' placeholder='Type name to search...' type="text" onChange={(e)=>{ handleClickSearchEmp(e.target.value);fetchSearchData(e.target.value);}} />
+                <button className='text-white text-lg sm:text-2xl m-1 sm:mx-2 mr:2 ' onClick={()=>fetchSearchData(searchEmp)}><GoSearch/></button>
+            </div>
+            <div>
+                <button className="rounded-2xl p-3 mx-2 bg-neutral-700 hover:bg-neutral-300" onClick={() => setShowAddEmployeeModal(true)}>
+                    <FaUserPlus className='sm:text-base text-xs text-white'/> 
+                </button>
+            </div>
         </div>
         <div className='overflow-auto mt-16'>
-        <button
-   className="border border-gray-500 text-black-500 px-2 py-1 rounded-md mb-2"
-  onClick={() => setShowAddEmployeeModal(true)}
->
-  <FaUserPlus /> 
-</button>
             <table className='w-full border-2'>
                 <thead className='bg-gray-50 '>
                     <tr>

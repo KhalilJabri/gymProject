@@ -9,7 +9,7 @@ export const superAdminElements = [
         title: 'Dashboards',
         links: [
             {
-                name: 'Data Visualization',
+                name: 'DataVisualization',
                 icon: <TbReportAnalytics/>,
             },
             

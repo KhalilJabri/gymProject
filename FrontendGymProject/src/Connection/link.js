@@ -1,1 +1,1 @@
-export  const link = '	https://khaliljabri.pythonanywhere.com'
+export  const link = 'https://khaliljabri.pythonanywhere.com'

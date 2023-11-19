@@ -29,7 +29,7 @@ function Login() {
   const handleLoginSuccess = async (token) => {
     localStorage.setItem('authToken', token);
     console.log('Connexion réussie.');
-    navigate('/home'); // Redirect to '/home' upon successful login
+    navigate('/DataVisualization'); // Redirect to '/DataVisualization' upon successful login
   };
 
   const handleSubmit = async (event) => {

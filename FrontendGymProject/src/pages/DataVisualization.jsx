@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Layout, Card, Select } from 'antd';
-import Cards from '../Dashboard/Cards';
-import cardData from '../data/CardData';
-import AreaChart from '../Dashboard/AreaChart';
-import areaChartData from '../data/AreaChartData';
+import Cards from '../Dashboard/Cards.jsx';
+import cardData from '../data/CardData.js';
+import AreaChart from '../Dashboard/AreaChart.jsx';
+import areaChartData from '../data/AreaChartData.js';
 import columnChartData from '../data/ColumnChartData.js';
-import ColumnChart from '../Dashboard/ColumnChart';
-import TableSub from '../Dashboard/TableSub';
-import tableSubData from '../data/TableSubData';
+import ColumnChart from '../Dashboard/ColumnChart.jsx';
+import TableSub from '../Dashboard/TableSub.jsx';
+import tableSubData from '../data/TableSubData.js';
 import monthAreaChartData  from '../data/MonthAreaData.js';
-import MonthAreaChart from '../Dashboard/MonthArea';
+import MonthAreaChart from '../Dashboard/MonthArea.jsx';
 import '../Style/Home.css';
 
 const { Content } = Layout;
