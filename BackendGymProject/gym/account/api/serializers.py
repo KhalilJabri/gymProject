@@ -30,11 +30,11 @@ class RegisterUserSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
     class Meta:
         model = User
-        fields = ['email', 'name', 'password', 'password2', 'cin', 'number', 'address', 'birthdate', 'picture', 'gender']
+        fields = ['email', 'name', 'password', 'password2', 'cin', 'number', 'picture', 'address', 'birthdate', 'gender', 'is_active', 'is_admin']
         # exclude = ['created_at', 'otp', 'is_active', 'is_admin']
-        extra_kwargs = {
-            'picture': {'read_only': True}
-        }
+        # extra_kwargs = {
+        #     'picture': {'required': False}
+        # }
 
     def save(self):
         email = self.validated_data['email']
@@ -44,29 +44,39 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         cin = self.validated_data['cin']
         address = self.validated_data['address']
         number = self.validated_data['number']
+        gender = self.validated_data['gender']
         birthdate = self.validated_data['birthdate']
-        # picture = self.validated_data['picture']
+        picture = self.validated_data.get('picture', 'user.png')
+        is_active = self.validated_data['is_active']
+        is_admin = self.validated_data['is_admin']
 
         if not bool(re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email)):
             raise serializers.ValidationError({'message': 'Invalid email format!'})
+
         if password != password2 :
             raise serializers.ValidationError({'message': 'password mismatch!'})
+
         if not bool(re.match(r"^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])(?=.*[@#$])[\w\d@#$]{6,12}$", password)):
             raise serializers.ValidationError({'message': 'password must contain least one digit, one uppercase letter, '
                                                           'at least one lowercase letter, at least one special character'})
+
         if len(name) == 0:
             raise serializers.ValidationError({'message': 'name should not be empty!'})
         # print(bool(re.match(r'^(?:\d{8}|\d{12})$', cin)))
+
         if not bool(re.match(r'^(?:\d{8}|\d{12})$', cin)):
             raise serializers.ValidationError({'message': 'cin is not correct!'})
 
         user = User(email=email,
                     name=name,
                     cin=cin,
+                    gender=gender,
                     number=number,
                     address=address,
-                    # picture=picture,
-                    birthdate=birthdate)
+                    picture=picture,
+                    birthdate=birthdate,
+                    is_active=is_active,
+                    is_admin=is_admin)
         user.set_password(password)
         user.save()
         return user
@@ -278,12 +288,12 @@ class MngPersonCoachSerializer(serializers.ModelSerializer):
     picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
     class Meta:
         model = Person
-        fields = ['id', 'email', 'name', 'gender', 'address', 'number', 'cin', 'birthdate', 'picture', 'created_at']
+        fields = ['id', 'email', 'name', 'gender', 'address', 'number', 'cin', 'birthdate', 'picture']
         extra_kwargs = {
             'id': {'read_only': True},
             'created_at': {'read_only': True},
             # 'coach_profile': {'read_only': True},
-            'picture': {'read_only': True},
+            'picture': {'read_only': True, 'required': False},
         }
 
 class ActivitySerializer(serializers.ModelSerializer):
@@ -310,7 +320,8 @@ class AddCoachSerializer(serializers.ModelSerializer):
         model = Coach
         fields = ['id', 'hireDate', 'person', 'activity']
         extra_kwargs = {
-            'id': {'read_only': True}
+            'id': {'read_only': True},
+            'hireDate': {'required': False}
         }
 
 class UpdateCoachSerializer(serializers.ModelSerializer):

@@ -1,12 +1,29 @@
-# Ignore the virtual environment directory
-/menv
-
+# Ignore virtual environment
 menv/
 
-# Ignore database files (SQLite)
+# Ignore database file
 db.sqlite3
 
-# Ignore pycache files
-__pycache/
-__pycache__
-migrations
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+
+# Ignore media files
+mediafiles/
+
+# Ignore local settings
+local_settings.py
+
+# Ignore IDE-specific files
+.vscode/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+
+# Ignore miscellaneous files
+*.bak
+*.swp
+.DS_Store

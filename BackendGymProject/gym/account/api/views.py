@@ -51,15 +51,15 @@ class UserLoginView(APIView):
                 token = get_tokens_for_user(user)
                 return Response({'message': 'login success', 'token': token}, status=status.HTTP_200_OK)
             else:
-                # try:
-                #     user_active = User.objects.get(email=email)
-                # except User.DoesNotExist:
-                #     return Response({'message': 'user not found mail'}, status=status.HTTP_404_NOT_FOUND)
-                #
-                # if not user_active.is_active:
-                #     return Response({'message': 'user account not active'}, status=status.HTTP_400_BAD_REQUEST)
-                # else:
-                return Response({'message': 'user not found! password'}, status=status.HTTP_404_NOT_FOUND)
+                try:
+                    user_active = User.objects.get(email=email)
+                except User.DoesNotExist:
+                    return Response({'message': 'user not found mail'}, status=status.HTTP_404_NOT_FOUND)
+
+                if not user_active.is_active:
+                    return Response({'message': 'user account not active'}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response({'message': 'The password is incorrect!'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'something went wrong!', 'error': serializer.errors},
                         status=status.HTTP_400_BAD_REQUEST)
 
@@ -92,7 +92,6 @@ class UserRegisterView(APIView):
     def post(self, request):
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
-
             try:
                 gym = Gym.objects.all().first()
                 if gym is None:
@@ -105,13 +104,13 @@ class UserRegisterView(APIView):
             context = {
                 'employee_name': serializer.data['name'],
                 'gym_name': gym.name,
-                # 'gym_picture': gym.pictureGym.url
+                'gym_picture': gym.pictureGym
             }
             email_template = render(request, 'email_emplyee.html', context)
             email_content = email_template.content.decode('utf-8')
             send_greetings_mail_employee(serializer.data['email'], email_content)
             return Response({'message': 'registration successfully'}, status=status.HTTP_201_CREATED)
-        return Response({'message': 'something went wrong!', 'error': serializer.errors}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'something went wrong!', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class SendOtpView(APIView):
     def post(self, request):
@@ -960,7 +959,7 @@ class DashboardMoneyByMonthByYearView(APIView):
 
         queryset = Subscription.objects.filter(startDate__year=FilterByYear).values('startDate__month').annotate(price=Sum('price'))
         # total_price_by_month = Subscription.objects.filter(startDate__year=FilterByYear).annotate(month=ExtractMonth('startDate')).values('month').annotate(total_price=Sum('price')).order_by('month')
-        return Response({'message': 'prices by month by year','data': queryset}, status=status.HTTP_200_OK)
+        return Response({'message': 'prices by month by year', 'data': queryset}, status=status.HTTP_200_OK)
 
 class DashboardMoneyByActivityByYearView(APIView):
     # permission_classes = [IsAuthenticated, IsAdminUser]
