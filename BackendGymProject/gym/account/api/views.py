@@ -940,8 +940,14 @@ class DashboardView(APIView):
         numberPeopleByActivityGenderQueryset = Subscription.objects.values('activity__name', 'member__person__gender').annotate(number=Count(Cast('member', IntegerField()), distinct=True))
         numberPeopleByActivityGenderSerializer = DashboardnumberPeopleByActivityGenderSerializer(numberPeopleByActivityGenderQueryset, many=True)
 
+        distinct_years = Subscription.objects.values('startDate__year').distinct()
+
+        # Extract the years from the queryset
+        years = [entry['startDate__year'] for entry in distinct_years]
+
         data = {
             # 'x': x,
+            'years': years,
             'totalMoney': totalPrice,
             'moneyByYear': priceSerializer.data,
             'totalNumber': totalNumberQueryset,
